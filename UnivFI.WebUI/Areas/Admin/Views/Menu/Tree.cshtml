@@ -1,0 +1,462 @@
+@using UnivFI.WebUI.Areas.Admin.ViewModels.Menu
+@model List<MenuTreeViewModel>
+
+@{
+    ViewData["Title"] = "메뉴 트리";
+}
+
+<div class="container mx-auto px-4 py-6">
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold mb-4 md:mb-0">메뉴 트리</h1>
+        <div class="flex flex-wrap gap-2">
+            <a asp-action="Create" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+                <i class="fas fa-plus mr-1"></i> 새 메뉴 추가
+            </a>
+            <a asp-action="Index"
+                class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors">
+                <i class="fas fa-list mr-1"></i> 목록 보기
+            </a>
+            <button id="saveTreeBtn"
+                class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
+                <i class="fas fa-save mr-1"></i> 변경사항 저장
+            </button>
+        </div>
+    </div>
+
+    <div class="h-0.5 bg-gray-200 w-full mb-6"></div>
+
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="bg-gray-50 px-6 py-4 border-b flex flex-col md:flex-row justify-between items-center">
+            <h2 class="font-semibold text-lg mb-2 md:mb-0">메뉴 구조</h2>
+            <div class="flex items-center">
+                <input type="checkbox" id="showAllNodes" class="h-4 w-4 text-blue-600 focus:ring-blue-500 mr-2" checked>
+                <label for="showAllNodes" class="text-gray-700">모든 노드 펼치기</label>
+            </div>
+        </div>
+        <div class="p-6">
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4 text-blue-700">
+                <i class="fas fa-info-circle mr-1"></i> 메뉴를 드래그하여 순서를 변경하거나 다른 메뉴 아래로 이동할 수 있습니다.
+            </div>
+
+            <div id="menuTree"></div>
+
+            @if (!Model.Any())
+            {
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mt-4 text-yellow-700">
+                    등록된 메뉴가 없습니다. '새 메뉴 추가' 버튼을 클릭하여 메뉴를 추가하세요.
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- 작업 진행 중 표시할 모달 -->
+<div id="processingModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black bg-opacity-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+        <div class="text-center">
+            <div
+                class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent mb-4">
+            </div>
+            <h5 id="processingModalLabel" class="text-lg font-medium mb-2">변경사항을 저장하는 중입니다...</h5>
+            <p class="text-gray-500">잠시만 기다려 주세요.</p>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        #menuTree {
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 10px;
+            font-size: 1rem;
+        }
+
+        .jstree-default .jstree-anchor {
+            font-size: 1rem;
+            padding: 5px 8px;
+            height: auto;
+            line-height: 1.5;
+        }
+
+        .jstree-default .jstree-icon {
+            font-size: 1rem;
+        }
+
+        /* 폴더 아이콘 스타일 */
+        .jstree-default .jstree-themeicon-custom {
+            background: transparent !important;
+            box-shadow: none !important;
+        }
+
+        /* 메뉴 아이콘 크기 */
+        .menu-icon {
+            font-size: 1.1rem;
+            color: #3b82f6;
+            margin-right: 2px;
+        }
+
+        /* 열린 폴더와 닫힌 폴더 아이콘 */
+        .folder-icon {
+            color: #f59e0b;
+        }
+
+        /* 일반 메뉴 아이템 아이콘 */
+        .menu-item-icon {
+            color: #3b82f6;
+        }
+
+        .jstree-default .jstree-wholerow-clicked {
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .jstree-default .jstree-wholerow-hovered {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .menu-badge {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            margin-left: 0.5rem;
+            border-radius: 0.25rem;
+            background-color: #f8f9fa;
+        }
+
+        .menu-badge-new {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .node-actions {
+            display: none;
+            margin-left: 10px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .jstree-anchor:hover .node-actions {
+            display: inline-block;
+        }
+
+        .node-actions a {
+            position: relative;
+            z-index: 11;
+        }
+
+        .node-actions a:hover {
+            transform: translateY(-1px);
+            transition: transform 0.2s;
+        }
+
+        /* 트리 라인 스타일 */
+        .jstree-default .jstree-open>.jstree-ocl {
+            background-position: -36px -4px;
+        }
+
+        /* 열고 닫기 아이콘 스타일 */
+        .jstree-open>.jstree-ocl::before,
+        .jstree-closed>.jstree-ocl::before {
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+        }
+
+        .jstree-open>.jstree-ocl::before {
+            content: "\f078";
+            /* 아래쪽 화살표 */
+        }
+
+        .jstree-closed>.jstree-ocl::before {
+            content: "\f054";
+            /* 오른쪽 화살표 */
+        }
+
+        /* 트리 기본 아이콘 숨기기 */
+        .jstree-default .jstree-icon.jstree-ocl,
+        .jstree-default .jstree-icon.jstree-themeicon {
+            background-image: none !important;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
+    <script>
+        // 메뉴 트리 데이터 - 모델에서 가져오기
+        const treeData = @Json.Serialize(Model);
+
+        let treeModified = false;
+
+        const modalEl = document.getElementById('processingModal');
+
+        // 모달을 보여주는 함수
+        function showModal() {
+            console.log("모달을 표시합니다.");
+            modalEl.classList.remove('hidden');
+        }
+
+        // 모달을 닫는 함수
+        function closeModal() {
+            console.log("모달을 닫습니다.");
+            modalEl.classList.add('hidden');
+        }
+
+        $(function () {
+            // 데이터가 존재하는지 확인
+            if (treeData && treeData.length > 0) {
+                // JSTree 데이터 변환
+                const jsTreeData = convertToJsTreeFormat(treeData);
+
+                // 트리 초기화
+                initializeTree(jsTreeData);
+            } else {
+                // 데이터가 없을 경우, 트리 영역 숨김
+                $('#menuTree').hide();
+            }
+
+            // 모든 노드 펼치기/접기 토글
+            $('#showAllNodes').change(function () {
+                if ($(this).is(':checked')) {
+                    $('#menuTree').jstree('open_all');
+                } else {
+                    $('#menuTree').jstree('close_all');
+                }
+            });
+
+            // 변경사항 저장
+            $('#saveTreeBtn').click(function () {
+                if (!treeModified) {
+                    alert('변경된 사항이 없습니다.');
+                    return;
+                }
+
+                saveTreeChanges();
+            });
+        });
+
+        // JSTree 데이터 형식으로 변환
+        function convertToJsTreeFormat(menus) {
+            return menus.map(menu => {
+                const node = {
+                    id: 'menu_' + menu.id,
+                    text: menu.title,
+                    data: {
+                        id: menu.id,
+                        parentId: menu.parentId,
+                        menuKey: menu.menuKey,
+                        url: menu.url,
+                        menuOrder: menu.menuOrder,
+                        levels: menu.levels,
+                        useNewIcon: menu.useNewIcon
+                    },
+                    // 메뉴 타입에 따라 아이콘 클래스 다르게 설정
+                    icon: menu.children && menu.children.length > 0 ?
+                        'fas fa-folder folder-icon' :
+                        menu.url && menu.url.indexOf('http') === 0 ?
+                            'fas fa-external-link-alt menu-item-icon' :
+                            'fas fa-file-alt menu-item-icon'
+                };
+
+                // 아이콘 표시 HTML 추가
+                let htmlText = menu.title +
+                    `<small class="text-gray-500"> (${menu.menuKey})</small>`;
+
+                // 새 항목 표시
+                if (menu.useNewIcon === true) {
+                    htmlText += `<span class="menu-badge menu-badge-new">NEW</span>`;
+                }
+
+                // 액션 버튼 추가
+                htmlText += `<span class="node-actions">
+                            <a href="/Admin/Menu/Edit/${menu.id}" class="inline-flex items-center px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded hover:bg-yellow-200 mr-1">
+                                <i class="fas fa-pencil-alt"></i>
+                            </a>
+                                <a href="/Admin/Menu/Detail/${menu.id}" class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded hover:bg-blue-200">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </span>`;
+
+                node.text = htmlText;
+
+                // 재귀적으로 자식 노드 처리
+                if (menu.children && menu.children.length > 0) {
+                    node.children = convertToJsTreeFormat(menu.children);
+                    // 자식이 있는 노드는 폴더 아이콘 사용
+                    node.icon = 'fas fa-folder folder-icon';
+                }
+
+                return node;
+            });
+        }
+
+        // JSTree 초기화
+        function initializeTree(jsTreeData) {
+            $('#menuTree').jstree({
+                core: {
+                    data: jsTreeData,
+                    check_callback: true,
+                    themes: {
+                        responsive: true,
+                        dots: false,
+                        variant: 'large'
+                    }
+                },
+                plugins: ['dnd', 'wholerow', 'state', 'types'],
+                types: {
+                    default: {
+                        icon: 'fas fa-file-alt menu-item-icon'
+                    },
+                    folder: {
+                        icon: 'fas fa-folder folder-icon'
+                    }
+                },
+                dnd: {
+                    copy: false,
+                    open_timeout: 500
+                },
+                state: { key: 'univ-fi-menu-tree' }
+            }).on('move_node.jstree', function (e, data) {
+                treeModified = true;
+
+                // 노드 이동시 레벨 정보 업데이트
+                updateNodeLevels();
+
+                // 현재 상태 표시
+                showModifiedState();
+            }).on('open_node.jstree', function (e, data) {
+                // 노드가 열릴 때 아이콘 변경
+                var nodeEl = data.node.id;
+                var icon = $('#' + nodeEl + '_anchor > i.jstree-themeicon');
+                if (icon.hasClass('fa-folder')) {
+                    icon.removeClass('fa-folder').addClass('fa-folder-open');
+                }
+            }).on('close_node.jstree', function (e, data) {
+                // 노드가 닫힐 때 아이콘 변경
+                var nodeEl = data.node.id;
+                var icon = $('#' + nodeEl + '_anchor > i.jstree-themeicon');
+                if (icon.hasClass('fa-folder-open')) {
+                    icon.removeClass('fa-folder-open').addClass('fa-folder');
+                }
+            });
+
+            // 초기 로드 시 모든 노드 펼치기
+            $('#menuTree').on('loaded.jstree', function () {
+                $('#menuTree').jstree('open_all');
+                // 트리가 로드된 후 열린 폴더 아이콘으로 모두 변경
+                $('.folder-icon.fa-folder').removeClass('fa-folder').addClass('fa-folder-open');
+            });
+
+            // 액션 버튼 클릭 이벤트 처리
+            $('#menuTree').on('click', '.node-actions a', function (e) {
+                e.stopPropagation();
+                e.preventDefault();
+                const href = $(this).attr('href');
+                if (href) {
+                    window.location.href = href;
+                }
+            });
+        }
+
+        // 트리 노드의 레벨 정보 업데이트
+        function updateNodeLevels() {
+            const tree = $('#menuTree').jstree(true);
+            const allNodes = tree.get_json('#', { flat: true });
+
+            allNodes.forEach(node => {
+                const nodeId = node.id;
+                const depth = tree.get_path(nodeId).length - 1;
+
+                // 노드 데이터 업데이트
+                const nodeData = tree.get_node(nodeId).data;
+                if (nodeData) {
+                    nodeData.levels = depth;
+                }
+            });
+        }
+
+        // 수정 상태 표시
+        function showModifiedState() {
+            const saveBtn = $('#saveTreeBtn');
+            saveBtn.removeClass('bg-green-600 hover:bg-green-700').addClass('bg-red-600 hover:bg-red-700');
+            saveBtn.html('<i class="fas fa-save mr-1"></i> 변경사항 저장 *');
+        }
+
+        function saveTreeChanges() {
+            // 현재 트리 구조 가져오기
+            const tree = $('#menuTree').jstree(true);
+            const rootNodes = tree.get_json('#');
+            const menuUpdates = [];
+
+            // 재귀적으로 모든 노드 처리
+            processNodes(rootNodes, null, 0);
+
+            // 모달 표시 후 AJAX 요청 실행
+            showModal();
+
+            // 서버로 변경사항 전송
+            $.ajax({
+                url: '/Admin/Menu/UpdateMenuTree',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(menuUpdates),
+                headers: {
+                    'RequestVerificationToken': $('input:hidden[name="__RequestVerificationToken"]').val()
+                },
+                success: function (response) {
+                    if (response.success) {
+                        treeModified = false;
+                        const saveBtn = $('#saveTreeBtn');
+                        saveBtn.removeClass('bg-red-600 hover:bg-red-700').addClass('bg-green-600 hover:bg-green-700');
+                        saveBtn.html('<i class="fas fa-save mr-1"></i> 변경사항 저장');
+
+                        // 성공 메시지 표시
+                        alert(response.message);
+
+                        // 모달을 닫기 전 약간의 지연 (300ms 정도)
+                        setTimeout(closeModal, 300);
+                    } else {
+                        closeModal();
+                        alert(response.message);
+                    }
+                },
+                error: function () {
+                    closeModal();
+                    alert('서버 요청 중 오류가 발생했습니다. 다시 시도해 주세요.');
+                }
+            });
+
+            // 재귀적으로 노드 처리 및 업데이트 데이터 생성 함수
+            function processNodes(nodes, parentId, order) {
+                nodes.forEach((node, index) => {
+                    const nodeData = tree.get_node(node.id).data;
+
+                    // 메뉴 업데이트 정보 생성
+                    menuUpdates.push({
+                        id: nodeData.id,
+                        parentId: parentId,
+                        menuOrder: order + index,
+                        levels: nodeData.levels
+                    });
+
+                    // 자식 노드 처리
+                    if (node.children && node.children.length > 0) {
+                        processNodes(node.children, nodeData.id, 0);
+                    }
+                });
+            }
+        }
+    </script>
+
+    @* CSRF 토큰 추가 *@
+    @Html.AntiForgeryToken()
+}

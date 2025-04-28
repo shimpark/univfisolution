@@ -1,0 +1,62 @@
+/* 햄버거 아이콘 애니메이션 */
+.hamburger-icon {
+    transition: transform 0.3s ease-in-out;
+}
+
+.hamburger-icon.open {
+    transform: rotate(90deg);
+}
+
+/* 사이드바 토글 관련 애니메이션 */
+.sidebar-transition {
+    transition: width 0.3s ease-in-out, opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+/* 로고 영역 애니메이션 */
+.logo-container {
+    overflow: hidden;
+    transition: width 0.3s ease-in-out;
+}
+
+/* 사이드바 스타일 커스터마이징 */
+.sidebar-custom {
+    background-color: #1a2238;
+    border-right: 1px solid #2a3654;
+    overflow-y: auto;
+    height: 100%;
+    position: fixed;
+    width: 16rem; /* 64px * 4 = 256px, Tailwind w-64 */
+}
+
+@media (min-width: 768px) {
+    body {
+        padding-left: 0;
+    }
+    
+    body.sidebar-open {
+        padding-left: 16rem;
+    }
+}
+
+.sidebar-header {
+    background-color: #10b981;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.sidebar-profile {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 0.5rem;
+}
+
+.sidebar-menu-item {
+    border-left: 3px solid transparent;
+    transition: all 0.2s ease-in-out;
+}
+
+.sidebar-menu-item:hover, 
+.sidebar-menu-item.active {
+    background-color: rgba(16, 185, 129, 0.1);
+    border-left-color: #10b981;
+} 

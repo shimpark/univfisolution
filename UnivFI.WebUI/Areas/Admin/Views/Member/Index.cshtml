@@ -1,0 +1,354 @@
+@model UnivFI.WebUI.Areas.Admin.ViewModels.Member.MemberListViewModel
+@using X.PagedList
+@using X.PagedList.Mvc.Core
+@{
+    ViewData["Title"] = "멤버 관리";
+}
+
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">멤버 관리</h1>
+    </div>
+
+    <!-- 검색 폼 -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <form asp-action="Index" method="get" class="flex" id="searchForm">
+            <div class="flex">
+                <div class="relative">
+                    <button id="searchDropdown" type="button"
+                        class="px-4 py-2 bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors rounded-l flex items-center">
+                        검색 필드
+                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
+                            </path>
+                        </svg>
+                    </button>
+                    <div id="searchDropdownMenu"
+                        class="absolute left-0 mt-1 w-48 bg-white rounded-md shadow-lg hidden z-10 border">
+                        <div class="py-1">
+                            <div class="px-4 py-2">
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="checkName" value="Name"
+                                        class="search-field-checkbox mr-2">
+                                    <label for="checkName">이름</label>
+                                </div>
+                            </div>
+                            <div class="px-4 py-2">
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="checkEmail" value="Email"
+                                        class="search-field-checkbox mr-2">
+                                    <label for="checkEmail">이메일</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" name="searchfields" id="searchfieldsinput" value="@Model.SearchFields">
+                <input type="text" name="searchterm" value="@Model.SearchTerm"
+                    class="px-4 py-2 border focus:ring-blue-500 focus:border-blue-500 flex-1 min-w-0"
+                    placeholder="검색어를 입력하세요">
+                <input type="hidden" name="page" id="currentpage" value="@Model.CurrentPage">
+                <input type="hidden" name="pagesize" value="@Model.PageSize">
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-search"></i> 검색
+                </button>
+                @if (!string.IsNullOrEmpty(Model.SearchTerm))
+                {
+                    <button type="button" id="resetButton"
+                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded-r hover:bg-gray-400 transition-colors">
+                        <i class="fas fa-times"></i> 초기화
+                    </button>
+                }
+            </div>
+        </form>
+    </div>
+
+    <!-- 목록 테이블 -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <div class="flex items-center space-x-1 cursor-pointer sort-header" data-sort="Name">
+                                <span>이름</span>
+                                <span class="sort-icon" data-sort="@ViewBag.NameSortParm"></span>
+                            </div>
+                        </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <div class="flex items-center space-x-1 cursor-pointer sort-header" data-sort="Email">
+                                <span>이메일</span>
+                                <span class="sort-icon" data-sort="@ViewBag.EmailSortParm"></span>
+                            </div>
+                        </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            역할
+                        </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <div class="flex items-center space-x-1 cursor-pointer sort-header" data-sort="CreatedAt">
+                                <span>생성일</span>
+                                <span class="sort-icon" data-sort="@ViewBag.DateSortParm"></span>
+                            </div>
+                        </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            작업
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @foreach (var member in Model.Members)
+                    {
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">@member.Name</div>
+                                <div class="text-sm text-gray-500">@member.UserName</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">@member.Email</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex flex-wrap gap-1">
+                                    @foreach (var role in member.Roles)
+                                    {
+                                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+                                            @role
+                                        </span>
+                                    }
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">@member.FormattedCreatedAt</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <div class="flex space-x-2">
+                                    <button type="button" class="viewDetail text-blue-600 hover:text-blue-900"
+                                        data-id="@member.Id">상세보기</button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 페이지네이션 -->
+        <div class="px-6 py-4 bg-gray-50">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm text-gray-700">페이지당 항목:</span>
+                    <select id="pagesize" name="pagesize"
+                        class="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                        <option value="5" selected="@(Model.PageSize == 5)">5</option>
+                        <option value="10" selected="@(Model.PageSize == 10)">10</option>
+                        <option value="30" selected="@(Model.PageSize == 30)">30</option>
+                    </select>
+                </div>
+                <div>
+                    @Html.PagedListPager(Model.Members, page => Url.Action("Index", new { page, pagesize =
+                    Model.PageSize, searchterm = Model.SearchTerm, sortorder = Model.CurrentSort }),
+                                        new PagedListRenderOptions
+                                        {
+                                            LiElementClasses = new[] { "inline-flex", "items-center", "justify-center", "min-w-[32px]", "h-8",
+                                        "border", "border-gray-200", "mx-0.5", "rounded" },
+                                            PageClasses = new[] { "text-gray-600", "hover:bg-gray-50", "text-sm" },
+                                            ActiveLiElementClass = "bg-blue-500 border-blue-500 text-white font-medium hover:bg-blue-600",
+                                            LinkToFirstPageFormat = "«",
+                                            LinkToLastPageFormat = "»",
+                                            LinkToPreviousPageFormat = "‹",
+                                            LinkToNextPageFormat = "›",
+                                            MaximumPageNumbersToDisplay = 5,
+                                            DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+                                            DisplayLinkToLastPage = PagedListDisplayMode.Always,
+                                            DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+                                            DisplayLinkToNextPage = PagedListDisplayMode.Always,
+                                            UlElementClasses = new[] { "flex", "items-center", "justify-center", "space-x-0.5" },
+                                            EllipsesElementClass = "px-2 text-gray-400"
+                                        })
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // 페이지 크기 변경
+            $('#pagesize').change(function () {
+                var url = new URL(window.location.href);
+                url.searchParams.set('pagesize', $(this).val());
+                url.searchParams.set('page', 1);
+                window.location.href = url.toString();
+            });
+
+            // 검색 폼 제출 시 페이지 번호 1로 설정
+            $('#searchForm').on('submit', function (e) {
+                const searchTerm = $('input[name="searchterm"]').val().trim();
+                const searchFields = $('#searchfieldsinput').val();
+
+                if (searchTerm && !searchFields) {
+                    e.preventDefault();
+                    alert('검색 필드를 선택해주세요.');
+                    return false;
+                }
+
+                // 페이지 번호를 1로 설정
+                $('#currentpage').val(1);
+            });
+
+            // 상세보기 클릭 이벤트
+            $('.viewDetail').click(function () {
+                var memberId = $(this).data('id');
+                var currentUrl = new URL(window.location.href);
+
+                // 파라미터 수집 (소문자로 전송)
+                var params = {
+                    page: currentUrl.searchParams.get('page') || '1',
+                    pagesize: currentUrl.searchParams.get('pagesize') || '@Model.PageSize',
+                    searchterm: currentUrl.searchParams.get('searchterm') || '',
+                    searchfields: currentUrl.searchParams.get('searchfields') || '',
+                    sortorder: currentUrl.searchParams.get('sortorder') || ''
+                };
+
+                // URL 파라미터 생성
+                var queryString = Object.keys(params)
+                    .map(key => key + '=' + encodeURIComponent(params[key]))
+                    .join('&');
+
+                // 상세보기 페이지로 이동
+                window.location.href = '@Url.Action("Detail", "Member", new { area = "Admin" })/'
+                    + memberId + '?' + queryString;
+            });
+
+            // 검색 드롭다운 토글
+            $('#searchDropdown').click(function (e) {
+                e.stopPropagation();
+                $('#searchDropdownMenu').toggleClass('hidden');
+            });
+
+            // 검색 필드 체크박스 초기화
+            const searchFields = ($('#searchfieldsinput').val() || 'Name,Email').split(',');
+            $('.search-field-checkbox').each(function () {
+                $(this).prop('checked', searchFields.includes($(this).val()));
+            });
+
+            // 체크박스 변경 이벤트
+            $('.search-field-checkbox').change(function () {
+                const selectedFields = $('.search-field-checkbox:checked')
+                    .map(function () { return $(this).val(); })
+                    .get();
+
+                // 최소한 하나의 필드는 선택되어야 함
+                if (selectedFields.length === 0) {
+                    alert('최소한 하나의 검색 필드를 선택해야 합니다.');
+                    $(this).prop('checked', true);
+                    return;
+                }
+
+                $('#searchfieldsinput').val(selectedFields.join(','));
+
+                // 검색어가 있는 경우에만 자동 검색 실행
+                if ($('input[name="searchterm"]').val().trim()) {
+                    // 페이지 번호를 1로 설정하고 폼 제출
+                    $('#currentpage').val(1);
+                    $('#searchForm').submit();
+                }
+            });
+
+            // 문서 클릭시 드롭다운 닫기
+            $(document).click(function (e) {
+                if (!$(e.target).closest('#searchDropdown, #searchDropdownMenu').length) {
+                    $('#searchDropdownMenu').addClass('hidden');
+                }
+            });
+
+            // 초기화 버튼 클릭 이벤트
+            $('#resetButton').click(function () {
+                var url = new URL(window.location.href);
+
+                // 현재 파라미터 값 유지
+                var pageSize = url.searchParams.get('pagesize') || '@Model.PageSize';
+                var sortOrder = url.searchParams.get('sortorder') || '';
+
+                // 새로운 URL 생성 (검색어 제외, 페이지는 1로 설정)
+                url.searchParams.set('page', '1');
+                url.searchParams.set('pagesize', pageSize);
+                url.searchParams.delete('searchterm');
+                if (sortOrder) {
+                    url.searchParams.set('sortorder', sortOrder);
+                }
+
+                // 페이지 이동
+                window.location.href = url.toString();
+            });
+
+            // 정렬 관련 함수들
+            function getCurrentSortOrder() {
+                return new URLSearchParams(window.location.search).get('sortorder') || '';
+            }
+
+            function getNextSortOrder(field) {
+                const currentSort = getCurrentSortOrder();
+                if (currentSort === field) {
+                    return field + '_desc';
+                } else {
+                    return field;
+                }
+            }
+
+            function updateSortIcons() {
+                $('.sort-icon').each(function () {
+                    const field = $(this).closest('.sort-header').data('sort');
+                    const currentSort = getCurrentSortOrder();
+                    const currentField = currentSort?.split('_')[0];
+
+                    $(this).html('');
+
+                    // 현재 정렬 중인 필드인 경우
+                    if (field === currentField) {
+                        if (currentSort === field + '_desc') {
+                            $(this).html('<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>');
+                        } else {
+                            $(this).html('<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>');
+                        }
+                    } else {
+                        // 정렬되지 않은 다른 컬럼들은 기본 아이콘 표시
+                        $(this).html('<svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m-4 4v8m0 0l4-4m-4 4l-4-4"></path></svg>');
+                    }
+                });
+            }
+
+            // 정렬 헤더 클릭 이벤트
+            $('.sort-header').click(function () {
+                const field = $(this).data('sort');
+                const currentSort = getCurrentSortOrder();
+                const currentField = currentSort?.split('_')[0];
+                let nextSort;
+
+                // 현재 정렬 중인 필드를 클릭한 경우
+                if (field === currentField) {
+                    nextSort = currentSort === field + '_desc' ? field : field + '_desc';
+                } else {
+                    // 다른 필드를 클릭한 경우 항상 오름차순으로 시작
+                    nextSort = field;
+                }
+
+                // 현재 URL 파라미터 유지하면서 정렬 파라미터 업데이트
+                const url = new URL(window.location.href);
+                url.searchParams.set('sortorder', nextSort);
+                url.searchParams.set('page', '1');
+
+                window.location.href = url.toString();
+            });
+
+            // 페이지 로드시 정렬 아이콘 업데이트
+            updateSortIcons();
+        });
+    </script>
+}

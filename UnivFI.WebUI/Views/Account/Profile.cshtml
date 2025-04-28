@@ -1,0 +1,46 @@
+@model dynamic
+@{
+    ViewData["Title"] = "내 프로필";
+}
+
+<div class="container mx-auto px-4 py-6">
+    <div class="flex justify-center">
+        <div class="w-full max-w-2xl">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+                <div class="bg-blue-600 text-white px-6 py-4">
+                    <h4 class="text-xl font-semibold">내 프로필</h4>
+                </div>
+                <div class="p-6">
+                    <div class="text-center mb-6">
+                        <i class="fas fa-user-circle text-blue-600" style="font-size: 5rem;"></i>
+                    </div>
+
+                    <dl class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <dt class="font-medium text-gray-700">ID</dt>
+                        <dd class="md:col-span-2">@Model.Id</dd>
+
+                        <dt class="font-medium text-gray-700">사용자 이름</dt>
+                        <dd class="md:col-span-2">@Model.UserName</dd>
+
+                        <dt class="font-medium text-gray-700">이름</dt>
+                        <dd class="md:col-span-2">@Model.Name</dd>
+
+                        <dt class="font-medium text-gray-700">이메일</dt>
+                        <dd class="md:col-span-2">@Model.Email</dd>
+                    </dl>
+
+                    <div class="flex justify-between">
+                        <a asp-controller="Home" asp-action="Index" 
+                           class="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors">
+                            <i class="fas fa-arrow-left mr-1"></i>돌아가기
+                        </a>
+                        <a asp-controller="Account" asp-action="ChangePassword" 
+                           class="inline-flex items-center px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors">
+                            <i class="fas fa-shield-alt mr-1"></i>비밀번호 변경
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

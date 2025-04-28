@@ -1,0 +1,85 @@
+@model UnivFI.Application.DTOs.UpdateUserDto
+
+@{
+    ViewData["Title"] = "사용자 수정";
+    var returnPage = (int)(ViewBag.ReturnPage ?? 1);
+    var returnPageSize = (int)(ViewBag.ReturnPageSize ?? 10);
+    var returnSearchTerm = (string)(ViewBag.ReturnSearchTerm ?? "");
+    var returnSearchFields = (string)(ViewBag.ReturnSearchFields ?? "");
+}
+
+<div class="container mx-auto px-4 py-6">
+    <div class="max-w-3xl mx-auto">
+        <div class="flex items-center mb-6">
+            <a asp-action="Index" asp-route-page="@returnPage" asp-route-pageSize="@returnPageSize"
+                asp-route-searchTerm="@returnSearchTerm" asp-route-searchFields="@returnSearchFields"
+                class="text-blue-600 hover:text-blue-800 transition-colors mr-3">
+                <i class="bi bi-arrow-left"></i> 목록으로
+            </a>
+            <h1 class="text-2xl font-bold">@ViewData["Title"] - @Model.Name</h1>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <form asp-action="Edit" method="post">
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" name="returnPage" value="@returnPage" />
+                <input type="hidden" name="returnPageSize" value="@returnPageSize" />
+                <input type="hidden" name="returnSearchTerm" value="@returnSearchTerm" />
+                <input type="hidden" name="returnSearchFields" value="@returnSearchFields" />
+                <div asp-validation-summary="ModelOnly" class="text-red-600 mb-4"></div>
+
+                <div class="mb-4">
+                    <label asp-for="UserName" class="block text-gray-700 font-medium mb-2">아이디</label>
+                    <input asp-for="UserName" readonly
+                        class="w-full px-4 py-2 border rounded focus:outline-none bg-gray-100 text-gray-700" />
+                    <span asp-validation-for="UserName" class="text-red-600 text-sm"></span>
+                    <small class="text-gray-500">아이디는 변경할 수 없습니다.</small>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Email" class="block text-gray-700 font-medium mb-2">이메일</label>
+                    <input asp-for="Email"
+                        class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <span asp-validation-for="Email" class="text-red-600 text-sm"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Name" class="block text-gray-700 font-medium mb-2">이름</label>
+                    <input asp-for="Name"
+                        class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <span asp-validation-for="Name" class="text-red-600 text-sm"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Password" class="block text-gray-700 font-medium mb-2">새 비밀번호 (변경 시에만 입력)</label>
+                    <input asp-for="Password" type="password" autocomplete="off"
+                        class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <span asp-validation-for="Password" class="text-red-600 text-sm"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="ConfirmPassword" class="block text-gray-700 font-medium mb-2">비밀번호 확인</label>
+                    <input asp-for="ConfirmPassword" type="password" autocomplete="off"
+                        class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <span asp-validation-for="ConfirmPassword" class="text-red-600 text-sm"></span>
+                </div>
+
+                <div class="flex justify-between items-center mt-6">
+                    <a asp-action="Index" asp-route-page="@returnPage" asp-route-pageSize="@returnPageSize"
+                        asp-route-searchTerm="@returnSearchTerm" asp-route-searchFields="@returnSearchFields"
+                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors">취소</a>
+                    <button type="submit"
+                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+                        <i class="bi bi-check2 mr-1"></i> 저장
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

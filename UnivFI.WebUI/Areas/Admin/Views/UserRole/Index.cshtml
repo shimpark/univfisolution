@@ -1,0 +1,321 @@
+@model UserRoleIndexViewModel
+@using UnivFI.WebUI.Areas.Admin.ViewModels.UserRole
+
+@{
+    ViewData["Title"] = "사용자-역할 관리";
+}
+
+<div class="container mx-auto px-4 py-6">
+    <h1 class="text-2xl font-bold mb-4">사용자-역할 관리</h1>
+    <div class="h-0.5 bg-gray-200 w-full mb-6"></div>
+
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        <div>
+            <a asp-action="Assign"
+                class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+                <i class="fas fa-plus mr-2"></i> 새 역할 할당
+            </a>
+        </div>
+        <div class="w-full md:w-auto">
+            <form asp-action="Index" method="get" class="flex" id="searchForm">
+                <div class="flex">
+                    <input type="text" name="searchTerm" value="@Model.SearchTerm"
+                        class="px-4 py-2 border focus:ring-blue-500 focus:border-blue-500 flex-1 min-w-0"
+                        placeholder="사용자/역할 검색...">
+                    <input type="hidden" name="page" id="currentPage" value="@Model.CurrentPage">
+                    <input type="hidden" name="pageSize" value="@Model.PageSize">
+                    <input type="hidden" name="userId" value="@Model.UserId">
+                    <input type="hidden" name="roleId" value="@Model.RoleId">
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-search"></i> 검색
+                    </button>
+                    @if (!string.IsNullOrEmpty(Model.SearchTerm) || Model.UserId > 0 || Model.RoleId > 0)
+                    {
+                        <a asp-action="Index"
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-r hover:bg-gray-400 transition-colors">
+                            <i class="fas fa-times"></i> 초기화
+                        </a>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 필터링 옵션 -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+        <div class="bg-gray-50 px-6 py-4 border-b">
+            <h2 class="font-semibold text-lg">필터링 옵션</h2>
+        </div>
+        <div class="p-6">
+            <form asp-action="Index" method="get" class="grid grid-cols-1 md:grid-cols-3 gap-4" id="filterForm">
+                <input type="hidden" name="searchTerm" value="@Model.SearchTerm">
+                <input type="hidden" name="pageSize" value="@Model.PageSize">
+                <input type="hidden" name="page" value="1">
+                <div>
+                    <label for="userId" class="block text-sm font-medium text-gray-700 mb-1">사용자</label>
+                    <select id="userId" name="userId" asp-items="Model.UsersList"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <option value="0">모든 사용자</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="roleId" class="block text-sm font-medium text-gray-700 mb-1">역할</label>
+                    <select id="roleId" name="roleId" asp-items="Model.RolesList"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <option value="0">모든 역할</option>
+                    </select>
+                </div>
+                <div class="flex items-end">
+                    <button type="submit"
+                        class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        필터 적용
+                    </button>
+                    @if (Model.UserId > 0 || Model.RoleId > 0)
+                    {
+                        <a asp-action="Index" asp-route-searchTerm="@Model.SearchTerm" asp-route-pageSize="@Model.PageSize"
+                            class="ml-2 px-4 py-2 bg-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                            필터 초기화
+                        </a>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 사용자-역할 목록 테이블 -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="bg-gray-50 px-6 py-4 border-b">
+            <h2 class="font-semibold text-lg">사용자-역할 목록</h2>
+        </div>
+        <div class="p-6">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                아이디
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                이름
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                역할
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                액션
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="userRoleTableBody" class="bg-white divide-y divide-gray-200">
+                        @if (Model.UserRoles != null && Model.UserRoles.Any())
+                        {
+                            foreach (var userRole in Model.UserRoles)
+                            {
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">@userRole.UserName</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">@userRole.Name</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">@userRole.RoleName</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center space-x-2">
+                                            <a asp-action="ByUser" asp-route-userId="@userRole.UserId"
+                                                class="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors">
+                                                <i class="fas fa-user mr-1"></i> 사용자 역할
+                                            </a>
+                                            <a asp-action="ByRole" asp-route-roleId="@userRole.RoleId"
+                                                class="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors">
+                                                <i class="fas fa-shield-alt mr-1"></i> 역할 사용자
+                                            </a>
+                                            <button type="button" onclick="removeRole(@userRole.UserId, @userRole.RoleId)"
+                                                class="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors">
+                                                <i class="fas fa-trash mr-1"></i> 삭제
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="3" class="px-6 py-4 text-center text-gray-500">
+                                    데이터가 없습니다
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="paginationContainer">
+                @{
+                    var pagingModel = new UnivFI.WebUI.Areas.Admin.ViewModels.PaginationViewModel
+                    {
+                        CurrentPage = Model.CurrentPage,
+                        TotalPages = Model.TotalPages,
+                        PageSize = Model.PageSize,
+                        TotalItems = Model.TotalItems,
+                        AreaName = "Admin",
+                        ActionName = "Index",
+                        ControllerName = "UserRole"
+                    };
+
+                    if (!string.IsNullOrEmpty(Model.SearchTerm))
+                    {
+                        pagingModel.RouteData.Add("searchTerm", Model.SearchTerm);
+                    }
+
+                    if (Model.UserId > 0)
+                    {
+                        pagingModel.RouteData.Add("userId", Model.UserId.ToString());
+                    }
+
+                    if (Model.RoleId > 0)
+                    {
+                        pagingModel.RouteData.Add("roleId", Model.RoleId.ToString());
+                    }
+
+                    // 페이지 크기 파라미터를 RouteData에 추가
+                    pagingModel.RouteData.Add("pageSize", Model.PageSize.ToString());
+                }
+
+                <!-- 페이징 컴포넌트 -->
+                <partial name="_Pagination" model="pagingModel" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 로딩 오버레이 -->
+<div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 hidden">
+    <div class="bg-white p-5 rounded-lg shadow-lg flex items-center">
+        <div class="loader mr-3">
+            <svg class="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                </path>
+            </svg>
+        </div>
+        <div class="text-gray-700 text-lg">데이터를 불러오는 중...</div>
+    </div>
+</div>
+
+<!-- 에러 모달 -->
+<div id="errorModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg p-6 max-w-md w-full">
+        <div class="mb-4">
+            <h3 class="text-xl font-semibold text-red-600">오류 발생</h3>
+        </div>
+        <div class="mb-6">
+            <p id="errorMessage" class="text-gray-700">데이터를 불러오는 도중 오류가 발생했습니다.</p>
+        </div>
+        <div class="flex justify-end">
+            <button type="button" onclick="closeErrorModal()"
+                class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+                닫기
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // 페이징 기능 초기화
+            PaginationUtils.init({
+                controller: 'UserRole',
+                area: 'Admin',
+                loadPageCallback: loadUserRolePage
+            });
+
+            // 검색 기능 초기화
+            SearchUtils.init({
+                formSelector: '#searchForm',
+                searchCallback: searchUserRoles
+            });
+
+            // 필터 폼 제출 시 이벤트
+            $('#filterForm').on('submit', function () {
+                // 페이지 번호를 1로 리셋
+                $(this).find('input[name="page"]').val(1);
+            });
+
+            // 사용자-역할 페이지 로드 함수
+            function loadUserRolePage(page) {
+                const searchTerm = $('input[name="searchTerm"]').val();
+                const userId = $('#userId').val();
+                const roleId = $('#roleId').val();
+                const pageSize = $('input[name="pageSize"]').val();
+
+                PaginationUtils.loadPage({
+                    url: '@Url.Action("Index", "UserRole", new { area = "Admin" })',
+                    page: page,
+                    pageSize: pageSize,
+                    searchTerm: searchTerm,
+                    searchFields: '',
+                    userId: userId,
+                    roleId: roleId,
+                    tableBodySelector: '#userRoleTableBody',
+                    paginationSelector: '#paginationContainer'
+                });
+            }
+
+            // 사용자-역할 검색 함수
+            function searchUserRoles(searchTerm) {
+                // 검색어가 변경되면 페이지 번호 재설정
+                $('#currentPage').val(1);
+                loadUserRolePage(1);
+            }
+
+            // ESC 키를 눌렀을 때 모달 닫기
+            $(document).keydown(function (e) {
+                if (e.key === "Escape" && !$('#errorModal').hasClass('hidden')) {
+                    closeErrorModal();
+                }
+            });
+        });
+
+        function removeRole(userId, roleId) {
+            if (confirm('이 사용자에서 해당 역할을 제거하시겠습니까?')) {
+                $.ajax({
+                    url: '@Url.Action("Remove", "UserRole", new { area = "Admin" })',
+                    type: 'POST',
+                    data: {
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val(),
+                        UserId: userId,
+                        RoleId: roleId
+                    },
+                    success: function (result) {
+                        if (result.success) {
+                            alert('역할이 성공적으로 제거되었습니다.');
+                            location.reload();
+                        } else {
+                            alert('역할 제거 중 오류가 발생했습니다.');
+                        }
+                    },
+                    error: function () {
+                        alert('요청 처리 중 오류가 발생했습니다.');
+                    }
+                });
+            }
+        }
+
+        // 오류 모달 표시 함수
+        function showErrorModal(message) {
+            $('#errorMessage').text(message || '데이터를 불러오는 도중 오류가 발생했습니다.');
+            $('#errorModal').removeClass('hidden').addClass('flex');
+        }
+
+        // 오류 모달 닫기
+        function closeErrorModal() {
+            $('#errorModal').addClass('hidden').removeClass('flex');
+        }
+    </script>
+}

@@ -1,0 +1,111 @@
+@model UnivFI.Domain.Entities.MenuEntity
+@using UnivFI.Domain.Entities
+
+@{
+    ViewData["Title"] = "메뉴 삭제";
+    var assignedRoles = ViewBag.AssignedRoles as List<RoleEntity>;
+    var returnPage = ViewBag.ReturnPage ?? 1;
+    var returnPageSize = ViewBag.ReturnPageSize ?? 10;
+    var returnSearchTerm = ViewBag.ReturnSearchTerm as string ?? string.Empty;
+    var returnSearchFields = ViewBag.ReturnSearchFields as string ?? string.Empty;
+}
+
+<div class="container mx-auto px-4 py-6">
+    <h1 class="text-2xl font-bold mb-4">메뉴 삭제 확인</h1>
+    <div class="h-0.5 bg-gray-200 w-full mb-6"></div>
+
+    <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                    fill="currentColor">
+                    <path fill-rule="evenodd"
+                        d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                        clip-rule="evenodd" />
+                </svg>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-lg font-medium text-red-700">주의</h3>
+                <div class="mt-2 text-red-600">
+                    <p>이 메뉴를 삭제하면 연결된 모든 역할 관계도 함께 삭제됩니다.</p>
+                    <p class="font-bold mt-1">정말로 삭제하시겠습니까?</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div>
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="bg-gray-50 px-6 py-4 border-b">
+                    <h2 class="font-semibold text-lg">메뉴 정보</h2>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="text-gray-500 font-medium">ID</div>
+                            <div class="col-span-2">@Model.Id</div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="text-gray-500 font-medium">메뉴 키</div>
+                            <div class="col-span-2">@Model.MenuKey</div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="text-gray-500 font-medium">제목</div>
+                            <div class="col-span-2">@Model.Title</div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="text-gray-500 font-medium">URL</div>
+                            <div class="col-span-2">@Model.Url</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="bg-gray-50 px-6 py-4 border-b">
+                    <h2 class="font-semibold text-lg">할당된 역할</h2>
+                </div>
+                <div class="p-6">
+                    @if (assignedRoles != null && assignedRoles.Any())
+                    {
+                        <div class="divide-y divide-gray-200">
+                            @foreach (var role in assignedRoles)
+                            {
+                                <div class="py-3">
+                                    <span class="text-gray-700">@role.RoleName</span>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="bg-blue-50 text-blue-700 p-4 rounded">
+                            이 메뉴에 할당된 역할이 없습니다.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex space-x-2">
+        <form asp-action="Delete" method="post">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" name="returnPage" value="@returnPage" />
+            <input type="hidden" name="returnPageSize" value="@returnPageSize" />
+            <input type="hidden" name="returnSearchTerm" value="@returnSearchTerm" />
+            <input type="hidden" name="returnSearchFields" value="@returnSearchFields" />
+            <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors">
+                <i class="fas fa-trash mr-1"></i> 삭제
+            </button>
+        </form>
+        <a asp-action="Index" asp-route-page="@returnPage" asp-route-pageSize="@returnPageSize"
+            asp-route-searchTerm="@returnSearchTerm" asp-route-searchFields="@returnSearchFields"
+            class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors">
+            <i class="fas fa-arrow-left mr-1"></i> 취소
+        </a>
+    </div>
+</div>

@@ -1,0 +1,165 @@
+@using UnivFI.WebUI.Areas.Admin.ViewModels.UserRole
+@model UserRoleManageViewModel
+
+@{
+    ViewData["Title"] = "사용자 역할 관리";
+    var returnPage = ViewBag.ReturnPage ?? 1;
+    var returnPageSize = ViewBag.ReturnPageSize ?? 10;
+    var returnSearchTerm = ViewBag.ReturnSearchTerm ?? "";
+    var returnSearchFields = ViewBag.ReturnSearchFields ?? "";
+}
+
+<div class="container mx-auto px-4 py-6">
+    <h1 class="text-2xl font-bold mb-4">사용자 역할 관리</h1>
+    <div class="h-0.5 bg-gray-200 w-full mb-6"></div>
+
+    <div class="mb-6">
+        <a asp-action="Detail" asp-route-id="@Model.UserId" asp-route-returnPage="@returnPage"
+            asp-route-returnPageSize="@returnPageSize" asp-route-returnSearchTerm="@returnSearchTerm"
+            asp-route-returnSearchFields="@returnSearchFields"
+            class="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors">
+            <i class="fas fa-arrow-left mr-2"></i> 사용자 상세정보로 돌아가기
+        </a>
+        <a asp-action="Index" asp-route-page="@returnPage" asp-route-pageSize="@returnPageSize"
+            asp-route-searchTerm="@returnSearchTerm" asp-route-searchFields="@returnSearchFields"
+            class="inline-flex items-center px-4 py-2 ml-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors">
+            <i class="fas fa-list mr-2"></i> 사용자 목록으로 돌아가기
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6" role="alert">
+            <p>@TempData["SuccessMessage"]</p>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
+            <p>@TempData["ErrorMessage"]</p>
+        </div>
+    }
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- 사용자 정보 -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="bg-gray-50 px-6 py-4 border-b">
+                <h2 class="font-semibold text-lg">사용자 정보</h2>
+            </div>
+            <div class="p-6">
+                <div class="space-y-4">
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="text-gray-500 font-medium">ID</div>
+                        <div class="col-span-2">@Model.UserId</div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="text-gray-500 font-medium">이름</div>
+                        <div class="col-span-2">@Model.UserName</div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="text-gray-500 font-medium">이메일</div>
+                        <div class="col-span-2">@Model.UserEmail</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 현재 할당된 역할 -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="bg-gray-50 px-6 py-4 border-b">
+                <h2 class="font-semibold text-lg">현재 할당된 역할</h2>
+            </div>
+            <div class="p-6">
+                @if (Model.HasAssignedRoles)
+                {
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    역할명</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    작업</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @foreach (var role in Model.AssignedRoles)
+                            {
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap">@role.RoleName</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <form asp-action="RemoveRole" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="userId" value="@Model.UserId" />
+                                            <input type="hidden" name="roleId" value="@role.RoleId" />
+                                            <input type="hidden" name="returnPage" value="@returnPage" />
+                                            <input type="hidden" name="returnPageSize" value="@returnPageSize" />
+                                            <input type="hidden" name="returnSearchTerm" value="@returnSearchTerm" />
+                                            <input type="hidden" name="returnSearchFields" value="@returnSearchFields" />
+                                            <button type="submit" class="text-red-600 hover:text-red-800"
+                                                onclick="return confirm('정말로 이 역할을 제거하시겠습니까?');">
+                                                <i class="fas fa-trash mr-1"></i> 제거
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="text-gray-500 text-center py-4">
+                        <i class="fas fa-info-circle mr-2"></i> 할당된 역할이 없습니다.
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- 역할 할당 -->
+    <div class="mt-6">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="bg-gray-50 px-6 py-4 border-b">
+                <h2 class="font-semibold text-lg">역할 할당</h2>
+            </div>
+            <div class="p-6">
+                @if (Model.HasAvailableRoles)
+                {
+                    <form asp-action="AssignRole" method="post" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="userId" value="@Model.UserId" />
+                        <input type="hidden" name="returnPage" value="@returnPage" />
+                        <input type="hidden" name="returnPageSize" value="@returnPageSize" />
+                        <input type="hidden" name="returnSearchTerm" value="@returnSearchTerm" />
+                        <input type="hidden" name="returnSearchFields" value="@returnSearchFields" />
+
+                        <div>
+                            <label for="roleId" class="block text-sm font-medium text-gray-700 mb-1">역할 선택</label>
+                            <select name="roleId" id="roleId"
+                                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                @foreach (var role in Model.AvailableRoles)
+                                {
+                                    <option value="@role.Id">@role.RoleName</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div>
+                            <button type="submit"
+                                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-plus mr-2"></i> 역할 할당
+                            </button>
+                        </div>
+                    </form>
+                }
+                else
+                {
+                    <div class="text-gray-500 text-center py-4">
+                        <i class="fas fa-info-circle mr-2"></i> 할당 가능한 추가 역할이 없습니다.
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

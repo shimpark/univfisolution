@@ -1,0 +1,176 @@
+/* Handsontable 커스텀 스타일 */
+.handsontable {
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+}
+
+.handsontable th,
+.handsontable td {
+    height: 22px !important;
+    line-height: 20px !important;
+    padding: 0 4px !important;
+}
+
+.handsontable th {
+    background-color: #f1f3f5 !important;
+    font-weight: 600 !important;
+    color: #495057 !important;
+    text-align: center !important;
+    border: 1px solid rgb(226 232 240);
+}
+
+.handsontable td {
+    color: rgb(71 85 105);
+    border: 1px solid rgb(226 232 240);
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.handsontable .htDimmed {
+    color: rgb(148 163 184);
+}
+
+/* 컨테이너 스타일 */
+.hot-container {
+    width: 100%;
+    height: 700px;
+    background-color: white;
+    border: 1px solid rgb(226 232 240);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    position: relative;
+}
+
+#handsontable-container {
+    width: 100%;
+    height: 100%;
+}
+
+/* 계층 구조 스타일 */
+.parent-row {
+    font-weight: 500;
+    background-color: #f8f9fa;
+}
+
+.nested-row {
+    background-color: #ffffff;
+}
+
+/* 들여쓰기 스타일 */
+.indent-0 { padding-left: 4px !important; }
+.indent-1 { padding-left: 20px !important; }
+.indent-2 { padding-left: 36px !important; }
+.indent-3 { padding-left: 52px !important; }
+.indent-4 { padding-left: 68px !important; }
+
+/* 검색 하이라이트 */
+.search-highlight {
+    background-color: rgb(254 243 199);
+    color: rgb(146 64 14);
+}
+
+/* 로딩 스피너 스타일 */
+.loading-spinner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    background-color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-spinner .animate-spin {
+    width: 3rem;
+    height: 3rem;
+    border: 4px solid rgb(59 130 246);
+    border-top-color: transparent;
+    border-radius: 50%;
+}
+
+.loading-spinner.hidden {
+    display: none;
+}
+
+/* 스크롤바 스타일 */
+.handsontable .wtHolder::-webkit-scrollbar {
+    width: 0.5rem;
+    height: 0.5rem;
+}
+
+.handsontable .wtHolder::-webkit-scrollbar-thumb {
+    background-color: rgb(203 213 225);
+    border-radius: 9999px;
+}
+
+.handsontable .wtHolder::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(148 163 184);
+}
+
+.handsontable .wtHolder::-webkit-scrollbar-track {
+    background-color: rgb(241 245 249);
+    border-radius: 9999px;
+}
+
+.handsontable .wtHolder {
+    min-height: 100%;
+}
+
+/* 새로운 행 스타일 */
+.new-row td {
+    background-color: #e8f4ff !important;
+}
+
+/* 선택된 셀 스타일 */
+.handsontable .current {
+    background-color: #e8f4ff !important;
+}
+
+/* 헤더 정렬 아이콘 */
+.handsontable .columnSorting:hover {
+    color: rgb(37 99 235);
+}
+
+/* 체크박스 정렬 */
+.handsontable .htCheckboxRendererInput {
+    margin: 2px auto !important;
+    display: block !important;
+}
+
+/* 드롭다운 메뉴 스타일 */
+.handsontable .htDropdownMenu {
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    border-radius: 0.5rem;
+    border: 1px solid rgb(226 232 240);
+    background-color: white;
+}
+
+.handsontable .htDropdownMenu .wtDropdownListOption {
+    padding: 0.5rem 1rem;
+    color: rgb(51 65 85);
+    cursor: pointer;
+}
+
+.handsontable .htDropdownMenu .wtDropdownListOption:hover {
+    background-color: rgb(248 250 252);
+}
+
+/* 행 호버 효과 */
+.handsontable tbody tr:hover {
+    background-color: rgb(243 244 246);
+}
+
+/* 테이블 보더 스타일 */
+.handsontable .htCore {
+    border: 1px solid #ddd;
+}
+
+.handsontable .htCore td {
+    border-right: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+} 

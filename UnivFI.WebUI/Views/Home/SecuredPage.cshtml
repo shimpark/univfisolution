@@ -1,0 +1,79 @@
+@{
+    ViewData["Title"] = "인증된 페이지";
+}
+
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-center">
+        <div class="w-full md:w-3/4 lg:w-2/3">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+                <div class="bg-green-600 text-white px-6 py-4">
+                    <h4 class="text-xl font-semibold">인증된 페이지</h4>
+                </div>
+                <div class="p-6">
+                    <div class="text-center mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-green-600" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                    </div>
+
+                    <div class="bg-green-100 border-l-4 border-green-600 text-green-700 p-4 mb-6">
+                        <h4 class="font-bold">인증 성공!</h4>
+                        <p>이 페이지는 로그인한 사용자만 볼 수 있습니다.</p>
+                    </div>
+
+                    <div class="bg-white border rounded-lg mb-6 overflow-hidden">
+                        <div class="bg-gray-100 px-4 py-3 border-b">
+                            <h5 class="font-semibold">사용자 인증 정보</h5>
+                        </div>
+                        <div class="divide-y">
+                            <div class="flex justify-between px-4 py-3">
+                                <span class="text-gray-600">사용자 ID:</span>
+                                <span
+                                    class="font-semibold">@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value</span>
+                            </div>
+                            <div class="flex justify-between px-4 py-3">
+                                <span class="text-gray-600">사용자명:</span>
+                                <span
+                                    class="font-semibold">@User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value</span>
+                            </div>
+                            <div class="flex justify-between px-4 py-3">
+                                <span class="text-gray-600">이름:</span>
+                                <span class="font-semibold">@User.FindFirst("Name")?.Value</span>
+                            </div>
+                            <div class="flex justify-between px-4 py-3">
+                                <span class="text-gray-600">이메일:</span>
+                                <span
+                                    class="font-semibold">@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value</span>
+                            </div>
+                            <div class="px-4 py-3">
+                                <div class="mb-2 text-gray-600">역할:</div>
+                                <div class="flex flex-wrap gap-2">
+                                    @foreach (var claim in User.FindAll(System.Security.Claims.ClaimTypes.Role))
+                                    {
+                                        <span class="bg-blue-600 text-white text-xs px-2 py-1 rounded">@claim.Value</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="text-gray-700 mb-6">이 페이지는 인증된 사용자만 볼 수 있는 보안 페이지입니다.</p>
+
+                    <div class="text-center">
+                        <a asp-controller="Home" asp-action="Index"
+                            class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                            </svg>
+                            홈으로 돌아가기
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

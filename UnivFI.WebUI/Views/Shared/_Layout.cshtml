@@ -1,0 +1,476 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - UnivFI.WebUI</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/tailwind.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/custom.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="~/css/pagination.css" />
+    <style>
+        body,
+        html {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+
+        [x-cloak] {
+            display: none !important;
+        }
+
+        .side-menu-active {
+            background-color: rgba(0, 149, 182, 0.1);
+            border-left: 3px solid #0095b6;
+        }
+
+        /* 사용자 프로필 영역 애니메이션 */
+        .profile-hover-effect {
+            transition: all 0.3s ease;
+        }
+
+        .profile-hover-effect:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        /* 대시보드 버튼 스타일 */
+        .dashboard-button {
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .dashboard-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* 메뉴 아이템 스타일 */
+        .menu-item-active {
+            background-color: #0d9488;
+            color: white !important;
+            font-weight: 500;
+        }
+
+        /* 하위 메뉴 아이템 스타일 */
+        .submenu-item-active {
+            background-color: rgba(13, 148, 136, 0.2);
+            color: white !important;
+            font-weight: 500;
+            border-left: 3px solid #0d9488;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.1/dist/cdn.min.js" defer></script>
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+
+<body class="flex flex-col min-h-screen bg-gray-100" x-data="{ 
+        currentController: '@ViewContext.RouteData.Values["controller"]', 
+        currentAction: '@ViewContext.RouteData.Values["action"]',
+        mobileMenuOpen: false,
+        sidebarOpen: true,
+        handleResize() {
+            if (window.innerWidth >= 768 && this.mobileMenuOpen) {
+                this.mobileMenuOpen = false;
+            }
+        }
+    }" x-init="
+        $watch('sidebarOpen', value => {
+            if (value) {
+                document.body.classList.add('sidebar-open');
+            } else {
+                document.body.classList.remove('sidebar-open');
+            }
+        });
+        $watch('mobileMenuOpen', value => { 
+            if (value) {
+                document.body.classList.add('overflow-hidden');
+            } else {
+                document.body.classList.remove('overflow-hidden');
+            }
+        });
+        document.body.classList.add('sidebar-open');
+        window.addEventListener('resize', () => handleResize());
+    " x-on:resize.window="handleResize()">
+
+    <div class="flex w-full">
+        <!-- 좌측 사이드바 (데스크톱) -->
+        <aside
+            class="sidebar-custom text-white w-64 fixed inset-y-0 left-0 z-20 transform transition-transform duration-300 hidden md:block"
+            x-bind:class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen}">
+            <!-- 로고 영역 -->
+            <div class="p-4 sidebar-header">
+                <a asp-controller="Home" asp-action="Index" class="flex items-center">
+                    <span class="text-xl font-bold">UnivFI</span>
+                </a>
+            </div>
+
+            <!-- 사용자 정보 영역 -->
+            <div class="p-4 border-b border-gray-800">
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <div class="flex items-center mb-3 profile-hover-effect sidebar-profile p-2">
+                        <div class="mr-3 bg-teal-500 rounded-full w-10 h-10 flex items-center justify-center shadow-md">
+                            <i class="bi bi-person-circle text-xl text-white"></i>
+                        </div>
+                        <div class="overflow-hidden">
+                            <div class="font-semibold text-white truncate">
+                                @Html.Raw(User.FindFirst("Name")?.Value ?? User.Identity.Name)
+                            </div>
+                            <div class="text-xs text-gray-300 truncate">
+                                @(User.FindFirst("Email")?.Value ?? "admin@example.com")
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2 mt-2">
+                        <a asp-controller="Account" asp-action="Profile"
+                            class="flex-1 text-center py-1.5 bg-gray-800 rounded text-xs text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
+                            <i class="bi bi-person-circle mr-1"></i>프로필
+                        </a>
+                        <form asp-controller="Account" asp-action="Logout" method="post" class="flex-1">
+                            @Html.AntiForgeryToken()
+                            <button type="submit"
+                                class="w-full text-center py-1.5 bg-gray-800 rounded text-xs text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
+                                <i class="bi bi-box-arrow-right mr-1"></i>로그아웃
+                            </button>
+                        </form>
+                    </div>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login"
+                        class="flex items-center px-3 py-3 text-gray-300 hover:text-white hover:bg-gray-700 rounded transition-colors">
+                        <i class="bi bi-box-arrow-in-right mr-2"></i>
+                        <span>로그인</span>
+                    </a>
+                }
+            </div>
+
+            <!-- 접이식 메뉴 영역 추가 -->
+            <div class="px-3 py-2">
+                <div x-data="{ personalInfoOpen: false }" class="mb-2">
+                    <button x-on:click="personalInfoOpen = !personalInfoOpen"
+                        class="flex items-center justify-between w-full text-left px-3 py-2 text-gray-300 hover:text-white rounded transition-colors sidebar-menu-item">
+                        <div class="flex items-center">
+                            <i class="bi bi-person mr-2"></i>
+                            <span>개인 정보</span>
+                        </div>
+                        <svg class="w-4 h-4 transition-transform" :class="{ 'transform rotate-180': personalInfoOpen }"
+                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="personalInfoOpen" x-transition class="mt-1 ml-2 pl-3 border-l border-gray-700">
+                        <a href="#" class="block py-1.5 px-2 text-sm text-gray-400 hover:text-white sidebar-menu-item">내
+                            프로필</a>
+                        <a href="#"
+                            class="block py-1.5 px-2 text-sm text-gray-400 hover:text-white sidebar-menu-item">설정</a>
+                        <a href="#"
+                            class="block py-1.5 px-2 text-sm text-gray-400 hover:text-white sidebar-menu-item">알림</a>
+                    </div>
+                </div>
+
+                <div x-data="{ menuRoleOpen: false }" class="mb-2">
+                    <button x-on:click="menuRoleOpen = !menuRoleOpen"
+                        class="flex items-center justify-between w-full text-left px-3 py-2 text-gray-300 hover:text-white rounded transition-colors sidebar-menu-item">
+                        <div class="flex items-center">
+                            <i class="bi bi-menu-button-wide mr-2"></i>
+                            <span>메뉴 역할</span>
+                        </div>
+                        <svg class="w-4 h-4 transition-transform" :class="{ 'transform rotate-180': menuRoleOpen }"
+                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="menuRoleOpen" x-transition class="mt-1 ml-2 pl-3 border-l border-gray-700">
+                        <a href="#"
+                            class="block py-1.5 px-2 text-sm text-gray-400 hover:text-white sidebar-menu-item">메뉴 관리</a>
+                        <a href="#"
+                            class="block py-1.5 px-2 text-sm text-gray-400 hover:text-white sidebar-menu-item">역할 설정</a>
+                        <a href="#"
+                            class="block py-1.5 px-2 text-sm text-gray-400 hover:text-white sidebar-menu-item">권한 관리</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 메뉴 영역 -->
+            <nav class="mt-2">
+                @{
+                    ViewData["MenuId"] = "menu";
+                }
+                <partial name="_UnifiedMenu" />
+            </nav>
+        </aside>
+
+        <!-- 모바일 메뉴 (사이드 드로워) -->
+        <div x-show="mobileMenuOpen" x-cloak class="fixed inset-0 flex z-40"
+            x-transition:enter="transition-opacity ease-linear duration-300" x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-linear duration-300"
+            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+            <!-- 백드롭 -->
+            <div x-on:click="mobileMenuOpen = false" x-show="mobileMenuOpen" class="fixed inset-0">
+                <div class="absolute inset-0 bg-gray-600 opacity-75"></div>
+            </div>
+
+            <!-- 모바일 메뉴 내용 -->
+            <div x-show="mobileMenuOpen" class="relative flex-1 flex flex-col max-w-xs w-full sidebar-custom"
+                x-transition:enter="transition ease-in-out duration-300 transform"
+                x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0"
+                x-transition:leave="transition ease-in-out duration-300 transform"
+                x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full">
+                <!-- 모바일 메뉴 헤더 -->
+                <div class="px-4 pt-5 pb-2 flex items-center justify-between sidebar-header">
+                    <div class="flex items-center">
+                        <span class="text-white text-xl font-semibold ml-2">UnivFI</span>
+                    </div>
+                    <button x-on:click="mobileMenuOpen = false"
+                        class="text-gray-400 hover:text-white focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- 모바일 사용자 정보 -->
+                <div class="px-4 py-3 border-b border-gray-800">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <div class="flex items-center profile-hover-effect sidebar-profile p-3">
+                            <div class="mr-3 bg-teal-500 rounded-full w-10 h-10 flex items-center justify-center shadow-md">
+                                <i class="bi bi-person-circle text-lg text-white"></i>
+                            </div>
+                            <div class="overflow-hidden">
+                                <div class="font-semibold text-white truncate">
+                                    @Html.Raw(User.FindFirst("Name")?.Value ?? User.Identity.Name)
+                                </div>
+                                <div class="text-xs text-gray-300 truncate">
+                                    @(User.FindFirst("Email")?.Value ?? "admin@example.com")
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <a asp-controller="Account" asp-action="Login"
+                            class="flex items-center px-3 py-3 text-gray-300 hover:text-white hover:bg-gray-700 rounded transition-colors">
+                            <i class="bi bi-box-arrow-in-right mr-2"></i>
+                            <span>로그인</span>
+                        </a>
+                    }
+                </div>
+
+                <!-- 모바일 접이식 메뉴 영역 추가 -->
+                <div class="px-3 py-2">
+                    <div x-data="{ personalInfoOpen: false }" class="mb-2">
+                        <button x-on:click="personalInfoOpen = !personalInfoOpen"
+                            class="flex items-center justify-between w-full text-left px-3 py-2 text-gray-300 hover:bg-gray-800 hover:text-white rounded transition-colors">
+                            <div class="flex items-center">
+                                <i class="bi bi-person mr-2"></i>
+                                <span>개인 정보</span>
+                            </div>
+                            <svg class="w-4 h-4 transition-transform"
+                                :class="{ 'transform rotate-180': personalInfoOpen }" xmlns="http://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div x-show="personalInfoOpen" x-transition class="mt-1 ml-2 pl-3 border-l border-gray-700">
+                            <a href="#" class="block py-1.5 px-2 text-sm text-gray-400 hover:text-white">내 프로필</a>
+                            <a href="#" class="block py-1.5 px-2 text-sm text-gray-400 hover:text-white">설정</a>
+                            <a href="#" class="block py-1.5 px-2 text-sm text-gray-400 hover:text-white">알림</a>
+                        </div>
+                    </div>
+
+                    <div x-data="{ menuRoleOpen: false }" class="mb-2">
+                        <button x-on:click="menuRoleOpen = !menuRoleOpen"
+                            class="flex items-center justify-between w-full text-left px-3 py-2 text-gray-300 hover:bg-gray-800 hover:text-white rounded transition-colors">
+                            <div class="flex items-center">
+                                <i class="bi bi-menu-button-wide mr-2"></i>
+                                <span>메뉴 역할</span>
+                            </div>
+                            <svg class="w-4 h-4 transition-transform" :class="{ 'transform rotate-180': menuRoleOpen }"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div x-show="menuRoleOpen" x-transition class="mt-1 ml-2 pl-3 border-l border-gray-700">
+                            <a href="#" class="block py-1.5 px-2 text-sm text-gray-400 hover:text-white">메뉴 관리</a>
+                            <a href="#" class="block py-1.5 px-2 text-sm text-gray-400 hover:text-white">역할 설정</a>
+                            <a href="#" class="block py-1.5 px-2 text-sm text-gray-400 hover:text-white">권한 관리</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 모바일 메뉴 콘텐츠 -->
+                <div class="flex-1 overflow-y-auto">
+                    @if (User.IsInRole("Administrators") || User.IsInRole("Admin"))
+                    {
+                        <a asp-area="Admin" asp-controller="Home" asp-action="Index"
+                            class="flex items-center px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-700 rounded transition-colors mt-2">
+                            <i class="fas fa-user-shield mr-2"></i>
+                            <span>관리자</span>
+                        </a>
+                    }
+                    @{
+                        ViewData["MenuId"] = "mobileMenu";
+                    }
+                    <partial name="_UnifiedMenu" />
+                </div>
+            </div>
+        </div>
+
+        <!-- 메인 콘텐츠 래퍼 -->
+        <div class="flex flex-col min-h-screen w-full">
+            <!-- 메인 헤더 -->
+            <header class="bg-white shadow-sm sticky top-0 z-10">
+                <div class="mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between h-16">
+                        <!-- 로고 및 모바일 메뉴 버튼 -->
+                        <div class="flex items-center">
+                            <!-- 모바일 메뉴 버튼 -->
+                            <button x-on:click="mobileMenuOpen = !mobileMenuOpen"
+                                class="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 md:hidden">
+                                <span class="sr-only">메뉴 열기</span>
+                                <!-- 아이콘 -->
+                                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
+
+                            <!-- 햄버거 아이콘 (PC) - 애니메이션 추가 -->
+                            <button x-on:click="sidebarOpen = !sidebarOpen"
+                                class="hidden md:inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 transition-all duration-300">
+                                <span class="sr-only">사이드바 토글</span>
+                                <svg class="h-6 w-6 transition-transform duration-300 hamburger-icon"
+                                    x-bind:class="{'open': !sidebarOpen}" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
+
+                            <!-- 로고 이미지 추가 -->
+                            <a asp-controller="Home" asp-action="Index" class="flex items-center ml-2">
+                                <!-- 로고 이미지 -->
+                                <div
+                                    class="rounded-full bg-blue-500 h-8 w-8 flex items-center justify-center text-white">
+                                    <span class="font-bold">U</span>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- 네비게이션 링크 (데스크탑) -->
+                        <nav class="hidden md:ml-6 md:flex md:space-x-8">
+                            <a asp-controller="Home" asp-action="Index"
+                                class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium text-gray-900 border-indigo-500">
+                                대시보드
+                            </a>
+                            @if (User.IsInRole("Administrators") || User.IsInRole("Admin"))
+                            {
+                                <a asp-area="Admin" asp-controller="Home" asp-action="Index"
+                                    class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                                    관리자
+                                </a>
+                            }
+                            <a href="/Docs"
+                                class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                                문서
+                            </a>
+                            <a href="/Calendar"
+                                class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                                일정
+                            </a>
+                        </nav>
+
+                        <!-- 우측 영역 (사용자 메뉴) -->
+                        <div class="ml-6 flex items-center">
+                            <!-- 알림 아이콘 -->
+                            <button
+                                class="p-1 rounded-full text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                <span class="sr-only">알림 보기</span>
+                                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+                            </button>
+
+                            <!-- 사용자 메뉴 -->
+                            <div class="ml-3 relative" x-data="{ open: false }">
+                                <div>
+                                    <button x-on:click="open = !open"
+                                        class="max-w-xs flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                        <span class="sr-only">사용자 메뉴 열기</span>
+                                        <img class="h-8 w-8 rounded-full"
+                                            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                                            alt="">
+                                    </button>
+                                </div>
+                                <div x-show="open" x-cloak x-on:click.away="open = false"
+                                    class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5">
+                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">내
+                                        프로필</a>
+                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">설정</a>
+                                    <a href="/Account/Logout"
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">로그아웃</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            </header>
+
+            <!-- 페이지 제목 및 경로 -->
+            <div class="bg-white shadow-sm px-6 py-3 border-b mt-0">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-semibold text-gray-800">@ViewData["Title"]</h1>
+                    <div class="ml-auto flex items-center text-sm text-gray-500">
+                        <a href="#" class="hover:text-teal-600 transition-colors">Home</a>
+                        <span class="mx-2">/</span>
+                        <span>@ViewData["Title"]</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 메인 컨텐츠 영역 -->
+            <main class="flex-1 bg-gray-50 py-6">
+                <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                    @RenderBody()
+                </div>
+            </main>
+
+            <!-- 푸터 -->
+            <footer class="bg-white border-t py-4">
+                <div class="container mx-auto px-4 text-gray-500 text-sm">
+                    &copy; 2025 - UnivFI.WebUI - <a asp-area="" asp-controller="Home" asp-action="Privacy"
+                        class="text-teal-600 hover:underline transition-colors">Privacy</a>
+                </div>
+            </footer>
+        </div>
+    </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/common.js" asp-append-version="true"></script>
+
+    <!-- 현재 컨트롤러/액션 정보 설정 -->
+    <script>
+        window.currentController = '@ViewContext.RouteData.Values["controller"]';
+        window.currentAction = '@ViewContext.RouteData.Values["action"]';
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+
+</html>

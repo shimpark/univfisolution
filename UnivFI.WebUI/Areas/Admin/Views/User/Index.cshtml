@@ -1,0 +1,294 @@
+@using UnivFI.WebUI.Areas.Admin.ViewModels.User
+@model UserListViewModel
+
+@{
+    ViewData["Title"] = "사용자 관리";
+}
+
+<div class="container mx-auto px-4 py-6">
+    <h1 class="text-2xl font-bold mb-4">사용자 관리</h1>
+    <div class="h-0.5 bg-gray-200 w-full mb-6"></div>
+
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        <div>
+            <a asp-action="Create"
+                class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+                <i class="fas fa-plus mr-2"></i> 새 사용자 추가
+            </a>
+        </div>
+        <div class="w-full md:w-auto">
+            <form asp-action="Index" method="get" class="flex" id="searchForm">
+                <div class="flex">
+                    <div class="relative">
+                        <button id="searchDropdown" type="button"
+                            class="px-4 py-2 bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors rounded-l flex items-center">
+                            검색 필드
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div id="searchDropdownMenu"
+                            class="absolute left-0 mt-1 w-48 bg-white rounded-md shadow-lg hidden z-10 border">
+                            <div class="py-1">
+                                <div class="px-4 py-2">
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="checkName" class="search-field-checkbox mr-2">
+                                        <label for="checkName">이름</label>
+                                    </div>
+                                </div>
+                                <div class="px-4 py-2">
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="checkEmail" class="search-field-checkbox mr-2">
+                                        <label for="checkEmail">이메일</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="searchFields" id="searchFieldsInput" value="@Model.SearchFields">
+                    <input type="text" name="searchTerm" value="@Model.SearchTerm"
+                        class="px-4 py-2 border focus:ring-blue-500 focus:border-blue-500 flex-1 min-w-0"
+                        placeholder="검색어를 입력하세요">
+                    <input type="hidden" name="page" id="currentPage" value="@Model.CurrentPage">
+                    <input type="hidden" name="pageSize" value="@Model.PageSize">
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-search"></i> 검색
+                    </button>
+                    @if (!string.IsNullOrEmpty(Model.SearchTerm))
+                    {
+                        <a asp-action="Index"
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-r hover:bg-gray-400 transition-colors">
+                            <i class="fas fa-times"></i> 초기화
+                        </a>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="bg-gray-50 px-6 py-4 border-b">
+            <h2 class="font-semibold text-lg">사용자 목록</h2>
+        </div>
+        <div class="p-6">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                ID
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                아이디
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                이름
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                이메일
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                생성일
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                액션
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody" class="bg-white divide-y divide-gray-200">
+                        @if (Model.Users != null && Model.Users.Any())
+                        {
+                            @foreach (var user in Model.Users.Select((item, index) => new { Item = item, Index = index }))
+                            {
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap">@(Model.TotalItems - (Model.CurrentPage - 1) *
+                                                                        Model.PageSize - user.Index)</td>
+                            <td class="px-6 py-4 whitespace-nowrap">@user.Item.UserName</td>
+                            <td class="px-6 py-4 whitespace-nowrap">@user.Item.Name</td>
+                            <td class="px-6 py-4 whitespace-nowrap">@user.Item.Email</td>
+                            <td class="px-6 py-4 whitespace-nowrap">@user.Item.FormattedCreatedAt</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center space-x-2">
+                                    <a asp-action="Edit" asp-route-id="@user.Item.Id"
+                                        asp-route-returnPage="@Model.CurrentPage"
+                                        asp-route-returnPageSize="@Model.PageSize"
+                                        asp-route-returnSearchTerm="@Model.SearchTerm"
+                                        asp-route-returnSearchFields="@Model.SearchFields"
+                                        class="px-3 py-1 bg-yellow-500 text-white text-sm rounded hover:bg-yellow-600 transition-colors">
+                                        <i class="fas fa-edit mr-1"></i> 수정
+                                    </a>
+                                    <a asp-action="Detail" asp-route-id="@user.Item.Id"
+                                        asp-route-returnPage="@Model.CurrentPage"
+                                        asp-route-returnPageSize="@Model.PageSize"
+                                        asp-route-returnSearchTerm="@Model.SearchTerm"
+                                        asp-route-returnSearchFields="@Model.SearchFields"
+                                        class="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors">
+                                        <i class="fas fa-eye mr-1"></i> 상세
+                                    </a>
+                                    <a asp-action="ManageRoles" asp-route-id="@user.Item.Id"
+                                        asp-route-returnPage="@Model.CurrentPage"
+                                        asp-route-returnPageSize="@Model.PageSize"
+                                        asp-route-returnSearchTerm="@Model.SearchTerm"
+                                        asp-route-returnSearchFields="@Model.SearchFields"
+                                        class="px-3 py-1 bg-purple-500 text-white text-sm rounded hover:bg-purple-600 transition-colors">
+                                        <i class="fas fa-user-tag mr-1"></i> 역할
+                                    </a>
+                                    <button type="button"
+                                        class="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors"
+                                        onclick="openDeleteModal(@user.Item.Id, '@user.Item.Name', '@Model.CurrentPage', '@Model.PageSize', '@Model.SearchTerm', '@Model.SearchFields')">
+                                        <i class="fas fa-trash mr-1"></i> 삭제
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                                                }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                                    데이터가 없습니다
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="paginationContainer">
+                @{
+                    var pagingModel = new UnivFI.WebUI.Areas.Admin.ViewModels.PaginationViewModel
+                    {
+                        CurrentPage = Model.CurrentPage,
+                        TotalPages = Model.TotalPages,
+                        PageSize = Model.PageSize,
+                        TotalItems = Model.TotalItems,
+                        AreaName = "Admin",
+                        ActionName = "Index",
+                        ControllerName = "User"
+                    };
+
+                    if (!string.IsNullOrEmpty(Model.SearchTerm))
+                    {
+                        pagingModel.RouteData.Add("searchTerm", Model.SearchTerm);
+                    }
+
+                    if (!string.IsNullOrEmpty(Model.SearchFields))
+                    {
+                        pagingModel.RouteData.Add("searchFields", Model.SearchFields);
+                    }
+
+                    // 페이지 크기 파라미터를 RouteData에 추가
+                    pagingModel.RouteData.Add("pageSize", Model.PageSize.ToString());
+                }
+
+                <!-- 페이징 컴포넌트 -->
+                <partial name="_Pagination" model="pagingModel" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 삭제 확인 모달 -->
+<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg max-w-md w-full p-6">
+        <div class="mb-4">
+            <h3 class="text-lg font-semibold" id="deleteModalTitle">사용자 삭제 확인</h3>
+        </div>
+        <div class="mb-6">
+            <p id="deleteModalMessage">사용자를 삭제하시겠습니까?</p>
+            <p class="text-red-600 mt-2">이 작업은 되돌릴 수 없습니다.</p>
+        </div>
+        <div class="flex justify-end space-x-3">
+            <button type="button"
+                class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
+                onclick="closeDeleteModal()">
+                취소
+            </button>
+            <form id="deleteForm" method="post">
+                <input type="hidden" id="deletePage" name="returnPage" value="" />
+                <input type="hidden" id="deletePageSize" name="returnPageSize" value="" />
+                <input type="hidden" id="deleteTerm" name="returnSearchTerm" value="" />
+                <input type="hidden" id="deleteFields" name="returnSearchFields" value="" />
+                <button type="submit"
+                    class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors">
+                    삭제
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // 페이징 기능 초기화
+            PaginationUtils.init({
+                controller: 'User',
+                loadPageCallback: loadUserPage
+            });
+
+            // 검색 기능 초기화
+            SearchUtils.init({
+                formSelector: '#searchForm',
+                searchCallback: searchUsers
+            });
+
+            // 사용자 페이지 로드 함수
+            function loadUserPage(page) {
+                const searchTerm = $('input[name="searchTerm"]').val();
+                const searchFields = $('#searchFieldsInput').val();
+                const pageSize = $("#pageSize").val(); // 현재 페이지 크기 가져오기
+                // 추가 필터링 매개변수가 있는 경우 여기에 추가
+
+                PaginationUtils.loadPage({
+                    url: '@Url.Action("Index", "User", new { area = "Admin" })',
+                    page: page,
+                    pageSize: pageSize,
+                    searchTerm: searchTerm,
+                    searchFields: searchFields,
+                    tableBodySelector: '#userTableBody',
+                    paginationSelector: '#paginationContainer'
+                });
+            }
+
+            // 사용자 검색 함수
+            function searchUsers(searchTerm) {
+                // 검색어가 변경되면 페이지 번호 재설정
+                $('#currentPage').val(1);
+                loadUserPage(1);
+            }
+
+            // ESC 키를 눌렀을 때 모달 닫기
+            $(document).keydown(function (e) {
+                if (e.key === "Escape" && !$('#deleteModal').hasClass('hidden')) {
+                    closeDeleteModal();
+                }
+            });
+        });
+
+        function openDeleteModal(id, name, page, pageSize, searchTerm, searchFields) {
+            // 페이지 크기 파라미터 추가
+            // 모달 내용 설정
+            $('#deleteModalTitle').text('사용자 삭제 확인');
+            $('#deleteModalMessage').text(`"${name}" 사용자를 삭제하시겠습니까?`);
+
+            // 삭제 폼 설정
+            $('#deleteForm').attr('action', `/Admin/User/Delete/${id}`);
+            $('#deletePage').val(page);
+            $('#deletePageSize').val(pageSize); // 페이지 크기 추가
+            $('#deleteTerm').val(searchTerm);
+            $('#deleteFields').val(searchFields);
+
+            // 모달 표시
+            $('#deleteModal').removeClass('hidden');
+        }
+
+        function closeDeleteModal() {
+            // 모달 숨기기
+            $('#deleteModal').addClass('hidden');
+        }
+    </script>
+}

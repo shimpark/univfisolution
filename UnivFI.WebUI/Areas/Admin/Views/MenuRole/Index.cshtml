@@ -1,0 +1,302 @@
+@using UnivFI.WebUI.Areas.Admin.ViewModels.MenuRole
+@model MenuRoleListViewModel
+@{
+    ViewData["Title"] = "메뉴 역할 관리";
+}
+
+<div class="container mx-auto px-4 py-6">
+    <h1 class="text-2xl font-bold mb-4">메뉴 역할 관리</h1>
+    <div class="h-0.5 bg-gray-200 w-full mb-6"></div>
+
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        <div>
+            <a asp-action="Assign"
+                class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+                <i class="fas fa-plus-circle mr-2"></i> 새 역할 할당
+            </a>
+        </div>
+        <div class="w-full md:w-auto">
+            <form asp-action="Index" method="get" class="flex" id="searchForm">
+                <div class="flex">
+                    <div class="relative">
+                        <button id="searchDropdown" type="button"
+                            class="px-4 py-2 bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors rounded-l flex items-center">
+                            검색 필드
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div id="searchDropdownMenu"
+                            class="absolute hidden mt-1 w-40 bg-white border rounded shadow-lg z-10">
+                            <div class="p-2">
+                                <div class="flex items-center mb-2">
+                                    <input class="form-checkbox search-field-checkbox h-4 w-4 text-blue-600"
+                                        type="checkbox" id="checkMenuKey" checked>
+                                    <label class="ml-2 text-sm text-gray-700" for="checkMenuKey">메뉴 키</label>
+                                </div>
+                                <div class="flex items-center mb-2">
+                                    <input class="form-checkbox search-field-checkbox h-4 w-4 text-blue-600"
+                                        type="checkbox" id="checkMenuTitle" checked>
+                                    <label class="ml-2 text-sm text-gray-700" for="checkMenuTitle">메뉴 제목</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input class="form-checkbox search-field-checkbox h-4 w-4 text-blue-600"
+                                        type="checkbox" id="checkRoleName" checked>
+                                    <label class="ml-2 text-sm text-gray-700" for="checkRoleName">역할 이름</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="text" class="px-4 py-2 border focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        name="searchTerm" value="@Model.SearchTerm" placeholder="검색어 입력..." id="searchInput">
+                    <input type="hidden" name="searchFields" id="searchFieldsInput" value="@Model.SearchFields">
+                    <input type="hidden" name="page" id="currentPage" value="@Model.CurrentPage">
+                    <input type="hidden" name="pageSize" value="@Model.PageSize">
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-search"></i> 검색
+                    </button>
+                    @if (!string.IsNullOrEmpty(Model.SearchTerm))
+                    {
+                        <a asp-action="Index"
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-r hover:bg-gray-400 transition-colors">
+                            <i class="fas fa-times"></i> 초기화
+                        </a>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="bg-blue-500 text-white px-6 py-4">
+            <h2 class="font-semibold text-lg">메뉴별 역할 할당 목록</h2>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.SearchTerm))
+        {
+            <div class="bg-blue-50 px-6 py-3 border-b border-blue-100 flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center">
+                    <span
+                        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                        <i class="fas fa-search mr-1.5"></i>
+                        검색 결과
+                    </span>
+                    <span class="ml-2 text-sm text-blue-700">
+                        '<span class="font-semibold">@Model.SearchTerm</span>'에 대한 검색 결과
+                        <span class="font-semibold">@(Model.TotalItems)</span>개가 발견되었습니다.
+                    </span>
+                </div>
+                <div>
+                    <span
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        검색 범위:
+                        @{
+                            string searchFieldsText = "전체";
+                            if (Model.SearchFields == "MenuKey") searchFieldsText = "메뉴 키";
+                            else if (Model.SearchFields == "MenuTitle") searchFieldsText = "메뉴 제목";
+                            else if (Model.SearchFields == "RoleName") searchFieldsText = "역할 이름";
+                        }
+                        @searchFieldsText
+                    </span>
+                </div>
+            </div>
+        }
+
+        <div class="p-6">
+            @if (Model.MenuRoles != null && Model.MenuRoles.Any())
+            {
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    메뉴 ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    역할 ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    메뉴 키</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    메뉴 제목</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    역할 이름</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    작업</th>
+                            </tr>
+                        </thead>
+                        <tbody id="menuRoleTableBody" class="bg-white divide-y divide-gray-200">
+                            @foreach (var menuRole in Model.MenuRoles)
+                            {
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap">@menuRole.MenuId</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">@menuRole.RoleId</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">@menuRole.MenuKey</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">@menuRole.MenuTitle</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">@menuRole.RoleName</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex space-x-2">
+                                            <a asp-action="ByMenu" asp-route-menuId="@menuRole.MenuId"
+                                                class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm hover:bg-blue-200 transition-colors">
+                                                <i class="fas fa-list mr-1"></i> 메뉴 역할
+                                            </a>
+                                            <a asp-action="ByRole" asp-route-roleId="@menuRole.RoleId"
+                                                class="inline-flex items-center px-3 py-1 bg-gray-200 text-gray-700 rounded text-sm hover:bg-gray-300 transition-colors">
+                                                <i class="fas fa-shield-alt mr-1"></i> 역할 메뉴
+                                            </a>
+                                            <form asp-action="Remove" method="post" class="inline-block"
+                                                onsubmit="return confirm('이 역할 할당을 제거하시겠습니까?');">
+                                                <input type="hidden" name="menuId" value="@menuRole.MenuId" />
+                                                <input type="hidden" name="roleId" value="@menuRole.RoleId" />
+                                                <button type="submit"
+                                                    class="inline-flex items-center px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition-colors">
+                                                    <i class="fas fa-trash mr-1"></i> 제거
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 페이징 컴포넌트 -->
+                <div id="paginationContainer">
+                    <partial name="_Pagination" model="@ViewBag.PagingModel" />
+                </div>
+            }
+            else
+            {
+                <div class="bg-blue-50 rounded-lg overflow-hidden shadow">
+                    @if (!string.IsNullOrEmpty(Model.SearchTerm))
+                    {
+                        <div class="flex flex-col items-center py-10 px-4 text-center">
+                            <div class="rounded-full bg-blue-100 p-4 mb-4">
+                                <i class="fas fa-search-minus text-4xl text-blue-500"></i>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-1">검색 결과가 없습니다</h3>
+                            <p class="text-sm text-gray-500 max-w-md mb-6">
+                                '<span class="font-medium">@Model.SearchTerm</span>'에 대한 검색 결과가 존재하지 않습니다.
+                                다른 검색어나 필터를 사용해 보세요.
+                            </p>
+                            <a asp-action="Index"
+                                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                <i class="fas fa-redo-alt mr-1.5"></i> 모든 역할 보기
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="flex items-center justify-center py-6 px-4">
+                            <div class="rounded-full bg-blue-100 p-2 mr-3">
+                                <i class="fas fa-info-circle text-xl text-blue-600"></i>
+                            </div>
+                            <p class="text-sm font-medium text-gray-700">
+                                할당된 메뉴 역할이 없습니다.
+                            </p>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- 로딩 오버레이 -->
+<div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 hidden">
+    <div class="bg-white p-5 rounded-lg shadow-lg flex items-center">
+        <div class="loader mr-3">
+            <svg class="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                </path>
+            </svg>
+        </div>
+        <div class="text-gray-700 text-lg">데이터를 불러오는 중...</div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // 검색 기능 초기화
+            SearchUtils.init({
+                defaultFields: "MenuKey,MenuTitle,RoleName",
+                formSelector: '#searchForm',
+                inputSelector: '#searchInput',
+                fieldsInputSelector: '#searchFieldsInput',
+                dropdownSelector: '#searchDropdown',
+                dropdownMenuSelector: '#searchDropdownMenu',
+                checkboxSelector: '.search-field-checkbox',
+                currentPageSelector: '#currentPage'
+            });
+
+            // 페이징 링크에 이벤트 위임 추가
+            $(document).on('click', '.pagination-link', function (e) {
+                if ($(this).hasClass('disabled')) {
+                    e.preventDefault();
+                    return;
+                }
+
+                const pageNumber = $(this).data('page');
+                if (pageNumber) {
+                    e.preventDefault();
+                    loadPage(pageNumber);
+                }
+            });
+
+            // 페이지 로드 함수
+            function loadPage(page) {
+                $('#currentPage').val(page);
+                $('#searchForm').submit();
+            }
+
+            // 페이지 사이즈 변경 이벤트
+            $('#pageSize').change(function () {
+                const pageSize = $(this).val();
+                const searchTerm = $('#searchInput').val();
+                const searchFields = $('#searchFieldsInput').val();
+
+                // 페이지 변경 시 1페이지로 이동하되 검색 조건은 유지
+                window.location.href = '@Url.Action("Index", "MenuRole", new { Area = AdminAreaConfiguration.AreaName })'
+                    + '?page=1&pageSize=' + pageSize
+                    + '&searchTerm=' + encodeURIComponent(searchTerm)
+                    + '&searchFields=' + encodeURIComponent(searchFields);
+            });
+
+            // Ajax를 통한 페이징 컴포넌트 동적 렌더링
+            function reloadPagination() {
+                const currentPage = parseInt($('#currentPage').val()) || 1;
+                const pageSize = parseInt('@Model.PageSize') || 10;
+                const totalItems = parseInt('@Model.TotalItems') || 0;
+                const totalPages = Math.ceil(totalItems / pageSize);
+                const searchTerm = $('#searchInput').val();
+                const searchFields = $('#searchFieldsInput').val();
+
+                $.ajax({
+                    url: '@Url.Action("RenderPagination", "MenuRole", new { Area = AdminAreaConfiguration.AreaName })',
+                    type: 'GET',
+                    data: {
+                        currentPage: currentPage,
+                        totalPages: totalPages,
+                        pageSize: pageSize,
+                        totalItems: totalItems,
+                        searchTerm: searchTerm,
+                        searchFields: searchFields
+                    },
+                    success: function (response) {
+                        if (response.paginationHtml) {
+                            $('#paginationContainer').html(response.paginationHtml);
+                        }
+                    },
+                    error: function (error) {
+                        console.error('페이징 컴포넌트 로드 실패:', error);
+                    }
+                });
+            }
+        });
+    </script>
+}

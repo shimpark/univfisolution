@@ -1,0 +1,99 @@
+@using UnivFI.WebUI.Areas.Admin.ViewModels.UserRole
+@model UserRoleAssignViewModel
+@{
+    ViewData["Title"] = "역할 할당";
+}
+
+<div class="container mx-auto px-4 py-6">
+    <h1 class="text-2xl font-bold mb-4">사용자에게 역할 할당</h1>
+    <div class="h-0.5 bg-gray-200 w-full mb-6"></div>
+
+    <div class="max-w-3xl mx-auto">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="bg-blue-600 text-white px-6 py-4">
+                <h2 class="font-semibold text-lg">사용자 및 역할 선택</h2>
+            </div>
+            <div class="p-6">
+                <form id="assignRoleForm" asp-action="AssignSubmit" method="post">
+                    <div asp-validation-summary="All" class="text-red-500 mb-4"></div>
+
+                    <div id="formErrorMessage" class="text-red-500 mb-4 hidden"></div>
+
+                    <div class="mb-4">
+                        <label asp-for="UserId" class="block text-gray-700 font-medium mb-2">사용자</label>
+                        <select asp-for="UserId" asp-items="Model.Users"
+                                class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="0">-- 사용자 선택 --</option>
+                        </select>
+                        <span asp-validation-for="UserId" class="text-red-500 text-sm"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="RoleId" class="block text-gray-700 font-medium mb-2">역할</label>
+                        <select asp-for="RoleId" asp-items="Model.Roles"
+                                class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="0">-- 역할 선택 --</option>
+                        </select>
+                        <span asp-validation-for="RoleId" class="text-red-500 text-sm"></span>
+                    </div>
+
+                    <div class="flex justify-between mt-6">
+                        <a asp-action="Index"
+                           class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors">
+                            <i class="fas fa-arrow-left mr-1"></i> 돌아가기
+                        </a>
+                        <button type="submit"
+                                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-check-circle mr-1"></i> 할당
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function () {
+            $("#assignRoleForm").submit(function (e) {
+                e.preventDefault();
+
+                // 폼 데이터 가져오기
+                var userId = $("#UserId").val();
+                var roleId = $("#RoleId").val();
+
+                // 기본 유효성 검사
+                if (userId == 0 || roleId == 0) {
+                    $("#formErrorMessage").text("사용자와 역할을 모두 선택해주세요.").removeClass("hidden");
+                    return false;
+                }
+
+                // AJAX 요청
+                $.ajax({
+                    url: '@Url.Action("AssignSubmit")',
+                    type: 'POST',
+                    data: {
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val(),
+                        UserId: userId,
+                        RoleId: roleId
+                    },
+                    success: function (result) {
+                        if (result.success) {
+                            // 성공 시 Index 페이지로 이동
+                            window.location.href = '@Url.Action("Index", "UserRole")';
+                        } else {
+                            $("#formErrorMessage").text(result.message).removeClass("hidden");
+                        }
+                    },
+                    error: function (xhr) {
+                        $("#formErrorMessage").text("요청 처리 중 오류가 발생했습니다.").removeClass("hidden");
+                    }
+                });
+            });
+        });
+    </script>
+}
