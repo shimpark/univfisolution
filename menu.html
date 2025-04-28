@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>상단 메뉴 예제</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <style>
+    [x-cloak] { display: none !important; }
+  </style>
+</head>
+<body class="bg-gray-100">
+  <header class="bg-teal-500 text-white shadow-md">
+    <!-- 최상단 네비게이션 바 -->
+    <div class="container mx-auto px-4">
+      <nav class="flex items-center justify-between h-16">
+        <!-- 로고 영역 -->
+        <div class="flex items-center">
+          <a href="#" class="font-bold text-xl">대학내일</a>
+        </div>
+
+        <!-- 모바일 메뉴 토글 버튼 -->
+        <div class="md:hidden">
+          <button type="button" x-data @click="document.querySelector('#mobile-menu').classList.toggle('hidden')" class="text-white focus:outline-none">
+            <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- 데스크톱 메뉴 -->
+        <div class="hidden md:flex md:items-center md:space-x-4">
+          <div x-data="{ open: false }" class="relative">
+            <button @click="open = !open" @click.away="open = false" class="flex items-center px-3 py-2 rounded hover:bg-teal-600 transition duration-150 ease-in-out">
+              기안결재진행
+              <svg class="ml-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <div x-show="open" x-cloak class="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+              <div class="py-1">
+                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">나의결재문서</a>
+                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">기안검색</a>
+                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">기안결재진행</a>
+                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">기안결재완료</a>
+              </div>
+            </div>
+          </div>
+
+          <div x-data="{ open: false }" class="relative">
+            <button @click="open = !open" @click.away="open = false" class="flex items-center px-3 py-2 rounded hover:bg-teal-600 transition duration-150 ease-in-out">
+              근태관리
+              <svg class="ml-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <div x-show="open" x-cloak class="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+              <div class="py-1">
+                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">일정관리</a>
+                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">업무관리</a>
+                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">그룹프로젝트</a>
+              </div>
+            </div>
+          </div>
+
+          <div x-data="{ open: false }" class="relative">
+            <button @click="open = !open" @click.away="open = false" class="flex items-center px-3 py-2 rounded hover:bg-teal-600 transition duration-150 ease-in-out">
+              경영관리
+              <svg class="ml-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <div x-show="open" x-cloak class="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+              <div class="py-1">
+                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">웹메일</a>
+                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">자료배포관리</a>
+                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">단위프로젝트</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </div>
+
+    <!-- 모바일 메뉴 -->
+    <div id="mobile-menu" class="hidden md:hidden">
+      <div class="px-2 pt-2 pb-3 space-y-1">
+        <div x-data="{ open: false }">
+          <button @click="open = !open" class="w-full text-left px-3 py-2 rounded hover:bg-teal-600 transition duration-150 ease-in-out">
+            기안결재진행
+            <svg class="inline-block ml-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div x-show="open" class="pl-4 pr-2">
+            <a href="#" class="block px-3 py-2 rounded text-sm hover:bg-teal-600 transition duration-150 ease-in-out">나의결재문서</a>
+            <a href="#" class="block px-3 py-2 rounded text-sm hover:bg-teal-600 transition duration-150 ease-in-out">기안검색</a>
+            <a href="#" class="block px-3 py-2 rounded text-sm hover:bg-teal-600 transition duration-150 ease-in-out">기안결재진행</a>
+            <a href="#" class="block px-3 py-2 rounded text-sm hover:bg-teal-600 transition duration-150 ease-in-out">기안결재완료</a>
+          </div>
+        </div>
+
+        <div x-data="{ open: false }">
+          <button @click="open = !open" class="w-full text-left px-3 py-2 rounded hover:bg-teal-600 transition duration-150 ease-in-out">
+            근태관리
+            <svg class="inline-block ml-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div x-show="open" class="pl-4 pr-2">
+            <a href="#" class="block px-3 py-2 rounded text-sm hover:bg-teal-600 transition duration-150 ease-in-out">일정관리</a>
+            <a href="#" class="block px-3 py-2 rounded text-sm hover:bg-teal-600 transition duration-150 ease-in-out">업무관리</a>
+            <a href="#" class="block px-3 py-2 rounded text-sm hover:bg-teal-600 transition duration-150 ease-in-out">그룹프로젝트</a>
+          </div>
+        </div>
+
+        <div x-data="{ open: false }">
+          <button @click="open = !open" class="w-full text-left px-3 py-2 rounded hover:bg-teal-600 transition duration-150 ease-in-out">
+            경영관리
+            <svg class="inline-block ml-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div x-show="open" class="pl-4 pr-2">
+            <a href="#" class="block px-3 py-2 rounded text-sm hover:bg-teal-600 transition duration-150 ease-in-out">웹메일</a>
+            <a href="#" class="block px-3 py-2 rounded text-sm hover:bg-teal-600 transition duration-150 ease-in-out">자료배포관리</a>
+            <a href="#" class="block px-3 py-2 rounded text-sm hover:bg-teal-600 transition duration-150 ease-in-out">단위프로젝트</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 메인 콘텐츠 영역 -->
+  <main class="container mx-auto px-4 py-6">
+    <div class="bg-white shadow-md rounded-lg p-6">
+      <h1 class="text-2xl font-bold text-gray-800 mb-4">기안결재진행</h1>
+      <p class="text-gray-600">
+        본인(상사)이 작성(기안)한 전문은 승인, 보류, 진행, 반려 처리된 문서들을 확인하실 수 있습니다.
+      </p>
+    </div>
+  </main>
+
+  <script>
+    // 필요한 추가 JavaScript 코드가 있다면 여기에 작성
+  </script>
+</body>
+</html> 

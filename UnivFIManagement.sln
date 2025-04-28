@@ -1,0 +1,56 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35806.99
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnivFI.Domain", "UnivFI.Domain\UnivFI.Domain.csproj", "{EF980B45-191A-440F-99D5-196C0CA27D1F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnivFI.Application", "UnivFI.Application\UnivFI.Application.csproj", "{9E7617CE-1D32-4956-8B8C-55E79836F745}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnivFI.Infrastructure", "UnivFI.Infrastructure\UnivFI.Infrastructure.csproj", "{899A2C46-5081-4662-B0E2-1E3650FBC422}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnivFI.WebUI", "UnivFI.WebUI\UnivFI.WebUI.csproj", "{B1318BF1-833D-4CF7-9174-21502B1E604A}"
+EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "UnivFI.SqlServer", "UnivFI.SqlServer\UnivFI.SqlServer.sqlproj", "{BE9D411C-941F-4BCA-82D5-E56F41D0ED53}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnivFI.EncryptionTool", "UnivFI.EncryptionTool\UnivFI.EncryptionTool.csproj", "{FAC951B3-FCC2-934F-433B-08581059B8FC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EF980B45-191A-440F-99D5-196C0CA27D1F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF980B45-191A-440F-99D5-196C0CA27D1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF980B45-191A-440F-99D5-196C0CA27D1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF980B45-191A-440F-99D5-196C0CA27D1F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E7617CE-1D32-4956-8B8C-55E79836F745}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E7617CE-1D32-4956-8B8C-55E79836F745}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E7617CE-1D32-4956-8B8C-55E79836F745}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E7617CE-1D32-4956-8B8C-55E79836F745}.Release|Any CPU.Build.0 = Release|Any CPU
+		{899A2C46-5081-4662-B0E2-1E3650FBC422}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{899A2C46-5081-4662-B0E2-1E3650FBC422}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{899A2C46-5081-4662-B0E2-1E3650FBC422}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{899A2C46-5081-4662-B0E2-1E3650FBC422}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1318BF1-833D-4CF7-9174-21502B1E604A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1318BF1-833D-4CF7-9174-21502B1E604A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1318BF1-833D-4CF7-9174-21502B1E604A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1318BF1-833D-4CF7-9174-21502B1E604A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE9D411C-941F-4BCA-82D5-E56F41D0ED53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE9D411C-941F-4BCA-82D5-E56F41D0ED53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE9D411C-941F-4BCA-82D5-E56F41D0ED53}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{BE9D411C-941F-4BCA-82D5-E56F41D0ED53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE9D411C-941F-4BCA-82D5-E56F41D0ED53}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE9D411C-941F-4BCA-82D5-E56F41D0ED53}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{FAC951B3-FCC2-934F-433B-08581059B8FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FAC951B3-FCC2-934F-433B-08581059B8FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FAC951B3-FCC2-934F-433B-08581059B8FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FAC951B3-FCC2-934F-433B-08581059B8FC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {214E9EE9-5C4A-4276-9F28-0B3EAF560D79}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,35 @@
+# 빌드 결과물
+bin/
+obj/
+
+node_modules/
+
+# Visual Studio 관련 파일
+.vs/
+*.user
+*.suo
+*.userosscache
+
+.cursorrules
+
+# IDE별 설정 폴더
+.vscode/
+.idea/
+
+# 로그 파일 및 임시 파일
+*.log
+
+# Windows 시스템 파일
+Thumbs.db
+ehthumbs.db
+
+# macOS 시스템 파일
+.DS_Store
+
+# GitLab CI/CD: 테스트 및 커버리지 결과 (필요에 따라 추가)
+coverage/
+test-results/
+
+.cursorignore
+*.mdc
+
